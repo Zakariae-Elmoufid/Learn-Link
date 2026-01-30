@@ -1,0 +1,115 @@
+package org.example.learnlink.modules.auth.service;
+
+import lombok.RequiredArgsConstructor;
+import org.example.learnlink.modules.auth.security.CustomUserDetails;
+import org.example.learnlink.modules.auth.security.JwtService;
+import org.example.learnlink.modules.auth.dto.*;
+import org.example.learnlink.modules.auth.exception.AuthenticationException;
+import org.example.learnlink.modules.user.entity.User;
+import org.example.learnlink.modules.user.entity.UserRole;
+import org.example.learnlink.modules.user.repository.UserRepository;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+public class AuthService {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
+    private final UserDetailsService userDetailsService;
+
+    @Transactional
+    public AuthResponse register(RegisterRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new AuthenticationException("Email already registered");
+        }
+
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new AuthenticationException("Username already taken");
+        }
+
+        User user = User.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(UserRole.STUDENT)
+                .active(true)
+                .emailVerified(false)
+                .build();
+
+        User savedUser = userRepository.save(user);
+
+        CustomUserDetails userDetails = new CustomUserDetails(savedUser);
+        String accessToken = jwtService.generateToken(userDetails);
+        String refreshToken = jwtService.generateRefreshToken(userDetails);
+
+        return buildAuthResponse(savedUser, accessToken, refreshToken);
+    }
+
+    public AuthResponse login(LoginRequest request) {
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()
+                    )
+            );
+        } catch (BadCredentialsException e) {
+            throw new AuthenticationException("Invalid email or password");
+        }
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new AuthenticationException("User not found"));
+
+        CustomUserDetails userDetails = new CustomUserDetails(user);
+        String accessToken = jwtService.generateToken(userDetails);
+        String refreshToken = jwtService.generateRefreshToken(userDetails);
+
+        return buildAuthResponse(user, accessToken, refreshToken);
+    }
+
+    public AuthResponse refreshToken(RefreshTokenRequest request) {
+        String refreshToken = request.getRefreshToken();
+        String userEmail = jwtService.extractUsername(refreshToken);
+
+        if (userEmail == null) {
+            throw new AuthenticationException("Invalid refresh token");
+        }
+
+        CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(userEmail);
+
+        if (!jwtService.isTokenValid(refreshToken, userDetails)) {
+            throw new AuthenticationException("Refresh token is expired or invalid");
+        }
+
+        String newAccessToken = jwtService.generateToken(userDetails);
+        String newRefreshToken = jwtService.generateRefreshToken(userDetails);
+
+        return buildAuthResponse(userDetails.getUser(), newAccessToken, newRefreshToken);
+    }
+
+    private AuthResponse buildAuthResponse(User user, String accessToken, String refreshToken) {
+        UserResponse userResponse = UserResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .active(user.getActive())
+                .emailVerified(user.getEmailVerified())
+                .role(user.getRole())
+                .build();
+
+        return AuthResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .user(userResponse)
+                .build();
+    }
+}
