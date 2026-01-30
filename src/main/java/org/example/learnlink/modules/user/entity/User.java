@@ -27,8 +27,10 @@ public class User {
     @Column(nullable = false, length = 50)
     private String username;
 
-    @Column(length = 500)
-    private String profilePictureUrl;
+    @Column(nullable = false)
+    private String password;
+
+
 
 
     @Column(nullable = false)
