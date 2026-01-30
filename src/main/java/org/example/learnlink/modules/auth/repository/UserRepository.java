@@ -1,6 +1,6 @@
-package org.example.learnlink.modules.user.repository;
+package org.example.learnlink.modules.auth.repository;
 
-import org.example.learnlink.modules.user.entity.User;
+import org.example.learnlink.modules.auth.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

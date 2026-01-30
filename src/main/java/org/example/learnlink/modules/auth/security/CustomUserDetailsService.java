@@ -1,8 +1,8 @@
 package org.example.learnlink.modules.auth.security;
 
 import lombok.RequiredArgsConstructor;
-import org.example.learnlink.modules.user.entity.User;
-import org.example.learnlink.modules.user.repository.UserRepository;
+import org.example.learnlink.modules.auth.entity.User;
+import org.example.learnlink.modules.auth.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

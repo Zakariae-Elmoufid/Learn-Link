@@ -1,7 +1,9 @@
-package org.example.learnlink.modules.user.entity;
+package org.example.learnlink.modules.auth.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDateTime;
 
 
 @Entity
@@ -43,7 +45,12 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
-    protected UserRole role;
+    private UserRole role;
+
+
+    @Column(name = "createdAt")
+    private LocalDateTime createdAt = LocalDateTime.now();
+
 
 
 }
