@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.learnlink.modules.user.entity.UserRole;
+import org.example.learnlink.modules.auth.entity.UserRole;
 
 @Data
 @Builder

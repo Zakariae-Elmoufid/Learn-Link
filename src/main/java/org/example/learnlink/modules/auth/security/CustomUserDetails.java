@@ -1,7 +1,7 @@
 package org.example.learnlink.modules.auth.security;
 
 import lombok.Getter;
-import org.example.learnlink.modules.user.entity.User;
+import org.example.learnlink.modules.auth.entity.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
