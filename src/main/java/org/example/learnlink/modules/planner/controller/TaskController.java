@@ -2,7 +2,7 @@ package org.example.learnlink.modules.planner.controller;
 
 import org.example.learnlink.modules.planner.dto.TaskRequest;
 import org.example.learnlink.modules.planner.dto.TaskResponse;
-import org.example.learnlink.modules.planner.service.TaskService;
+import org.example.learnlink.modules.planner.service.ITaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -21,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TaskController {
 
-    private final TaskService taskService;
+    private final ITaskService taskService;
 
     /**
      * Create a new task

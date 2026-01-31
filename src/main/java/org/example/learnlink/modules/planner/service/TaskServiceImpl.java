@@ -21,21 +21,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Service for managing tasks
+ * Implementation of task management service
  */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class TaskService {
+public class TaskServiceImpl implements ITaskService {
 
     private final TaskRepository taskRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final TaskMapper taskMapper; // MapStruct mapper
 
-    /**
-     * Create a new task
-     */
+    @Override
     public TaskResponse createTask(Long userId, TaskRequest request) {
         log.info("Creating task for user: {}", userId);
 
@@ -58,9 +56,7 @@ public class TaskService {
         return taskMapper.toResponse(savedTask);
     }
 
-    /**
-     * Get task by ID
-     */
+    @Override
     @Transactional(readOnly = true)
     public TaskResponse getTaskById(Long taskId) {
         Task task = taskRepository.findById(taskId)
@@ -68,36 +64,28 @@ public class TaskService {
         return taskMapper.toResponse(task);
     }
 
-    /**
-     * Get all tasks for a user
-     */
+    @Override
     @Transactional(readOnly = true)
     public List<TaskResponse> getUserTasks(Long userId) {
         List<Task> tasks = taskRepository.findByUserId(userId);
         return taskMapper.toResponseList(tasks);
     }
 
-    /**
-     * Get active tasks for a user
-     */
+    @Override
     @Transactional(readOnly = true)
     public List<TaskResponse> getActiveTasks(Long userId) {
         List<Task> tasks = taskRepository.findActiveTasksByUserId(userId);
         return taskMapper.toResponseList(tasks);
     }
 
-    /**
-     * Get tasks for a specific date range
-     */
+    @Override
     @Transactional(readOnly = true)
     public List<TaskResponse> getTasksByDateRange(Long userId, LocalDateTime startTime, LocalDateTime endTime) {
         List<Task> tasks = taskRepository.findByUserIdAndTimeRange(userId, startTime, endTime);
         return taskMapper.toResponseList(tasks);
     }
 
-    /**
-     * Get today's tasks
-     */
+    @Override
     @Transactional(readOnly = true)
     public List<TaskResponse> getTodayTasks(Long userId) {
         LocalDateTime dayStart = LocalDate.now().atStartOfDay();
@@ -106,18 +94,14 @@ public class TaskService {
         return taskMapper.toResponseList(tasks);
     }
 
-    /**
-     * Get overdue tasks
-     */
+    @Override
     @Transactional(readOnly = true)
     public List<TaskResponse> getOverdueTasks(Long userId) {
         List<Task> tasks = taskRepository.findOverdueTasksByUserId(userId, LocalDateTime.now());
         return taskMapper.toResponseList(tasks);
     }
 
-    /**
-     * Update a task
-     */
+    @Override
     public TaskResponse updateTask(Long taskId, TaskRequest request) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task", "id", taskId));
@@ -136,9 +120,7 @@ public class TaskService {
         return taskMapper.toResponse(updatedTask);
     }
 
-    /**
-     * Complete a task
-     */
+    @Override
     public TaskResponse completeTask(Long taskId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task", "id", taskId));
@@ -152,9 +134,7 @@ public class TaskService {
         return taskMapper.toResponse(completedTask);
     }
 
-    /**
-     * Delete a task
-     */
+    @Override
     public void deleteTask(Long taskId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task", "id", taskId));
