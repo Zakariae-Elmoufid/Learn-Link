@@ -1,7 +1,6 @@
 package org.example.learnlink.modules.auth.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.learnlink.common.event.UserRegisteredEvent;
 import org.example.learnlink.modules.auth.security.CustomUserDetails;
 import org.example.learnlink.modules.auth.security.JwtService;
 import org.example.learnlink.modules.auth.dto.*;
@@ -9,7 +8,6 @@ import org.example.learnlink.modules.auth.exception.AuthenticationException;
 import org.example.learnlink.modules.auth.entity.User;
 import org.example.learnlink.modules.auth.entity.UserRole;
 import org.example.learnlink.modules.auth.repository.UserRepository;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,7 +25,6 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
-    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -49,17 +46,6 @@ public class AuthService {
                 .build();
 
         User savedUser = userRepository.save(user);
-
-        eventPublisher.publishEvent(
-                new UserRegisteredEvent(
-                        savedUser.getId(),
-                        request.getFirstName(),
-                        request.getLastName(),
-                        request.getBio(),
-                        request.getStudentSubjectId(),
-                        request.getAcademicLevel()
-                )
-        );
 
         CustomUserDetails userDetails = new CustomUserDetails(savedUser);
         String accessToken = jwtService.generateToken(userDetails);
