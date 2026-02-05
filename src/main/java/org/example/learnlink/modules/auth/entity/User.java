@@ -44,7 +44,7 @@ public class User {
     private Boolean emailVerified = false;
 
     @Column(name = "verification_code")
-    private String VerificationCode;
+    private String verificationCode;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)

@@ -46,7 +46,7 @@ public class AuthService {
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .VerificationCode(UUID.randomUUID().toString())
+                .verificationCode(UUID.randomUUID().toString())
                 .role(UserRole.STUDENT)
                 .active(true)
                 .emailVerified(false)
