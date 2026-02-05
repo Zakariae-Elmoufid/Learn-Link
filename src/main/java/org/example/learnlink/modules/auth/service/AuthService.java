@@ -1,6 +1,7 @@
 package org.example.learnlink.modules.auth.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.learnlink.modules.auth.event.OnUserRegisteredEvent;
 import org.example.learnlink.modules.auth.security.CustomUserDetails;
 import org.example.learnlink.modules.auth.security.JwtService;
 import org.example.learnlink.modules.auth.dto.*;
@@ -8,6 +9,7 @@ import org.example.learnlink.modules.auth.exception.AuthenticationException;
 import org.example.learnlink.modules.auth.entity.User;
 import org.example.learnlink.modules.auth.entity.UserRole;
 import org.example.learnlink.modules.auth.repository.UserRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,6 +17,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -25,9 +29,11 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
+    private final ApplicationEventPublisher eventPublisher;
+
 
     @Transactional
-    public AuthResponse register(RegisterRequest request) {
+    public void register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new AuthenticationException("Email already registered");
         }
@@ -40,6 +46,7 @@ public class AuthService {
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .VerificationCode(UUID.randomUUID().toString())
                 .role(UserRole.STUDENT)
                 .active(true)
                 .emailVerified(false)
@@ -47,11 +54,18 @@ public class AuthService {
 
         User savedUser = userRepository.save(user);
 
-        CustomUserDetails userDetails = new CustomUserDetails(savedUser);
-        String accessToken = jwtService.generateToken(userDetails);
-        String refreshToken = jwtService.generateRefreshToken(userDetails);
 
-        return buildAuthResponse(savedUser, accessToken, refreshToken);
+        eventPublisher.publishEvent(new OnUserRegisteredEvent(savedUser));
+
+    }
+    public boolean verify(String code) {
+        User user = userRepository.findByVerificationCode(code).orElse(null);
+        if (user == null) return false;
+
+        user.setEmailVerified(true);
+        user.setVerificationCode(null);
+        userRepository.save(user);
+        return true;
     }
 
     public AuthResponse login(LoginRequest request) {

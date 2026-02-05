@@ -26,10 +26,17 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Invalid input or email/username already exists")
     })
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        AuthResponse response = authService.register(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
+         authService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Please check your email");
     }
+
+    @GetMapping("/verify")
+    public String verify(@RequestParam String code) {
+        boolean verified = authService.verify(code);
+        return verified ? "Account activated!" : "Invalid code!";
+    }
+
 
     @Operation(summary = "Login user", description = "Authenticates user and returns JWT tokens")
     @ApiResponses(value = {
