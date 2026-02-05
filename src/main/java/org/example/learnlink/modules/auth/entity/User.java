@@ -43,6 +43,9 @@ public class User {
     @Builder.Default
     private Boolean emailVerified = false;
 
+    @Column(name = "verification_code")
+    private String verificationCode;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private UserRole role;
