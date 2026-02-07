@@ -2,6 +2,8 @@ package org.example.learnlink.modules.user.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,14 +36,11 @@ public class UserProfile {
             joinColumns = @JoinColumn(name = "profile_id"),
             inverseJoinColumns = @JoinColumn(name = "subject_id")
     )
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<StudentSubject> subjects = new ArrayList<>();
-
     private String firstName;
     private String lastName;
-
     private String profilePictureUrl;
-
-
     @Enumerated(EnumType.STRING)
     private AcademicLevel academicLevel;
 
