@@ -15,10 +15,15 @@ import org.springframework.data.domain.Pageable;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
+
 /**
  * Integration tests for QuestionService
  */
 @SpringBootTest
+@ActiveProfiles("test")
+@Transactional
 public class QuestionServiceIntegrationTest {
 
     @Autowired
@@ -200,4 +205,5 @@ public class QuestionServiceIntegrationTest {
         assertEquals(q1.getId(), mostViewed.getContent().get(0).getId());
     }
 }
+
 

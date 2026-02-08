@@ -19,10 +19,15 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
+
 /**
  * Integration tests for AnswerService
  */
 @SpringBootTest
+@ActiveProfiles("test")
+@Transactional
 public class AnswerServiceIntegrationTest {
 
     @Autowired
@@ -243,7 +248,7 @@ public class AnswerServiceIntegrationTest {
         AnswerResponse answer1 = answerService.provideAnswer(testQuestion.getId(), 2L, provideAnswerRequest);
 
         // Vote it up 5 times
-        for (int i = 0; i < 5; i++) {
+        for (long i = 0; i < 5; i++) {
             answerService.voteAnswer(answer1.getId(), (100 + i), VoteType.UPVOTE);
         }
 
@@ -254,8 +259,8 @@ public class AnswerServiceIntegrationTest {
         AnswerResponse answer2 = answerService.provideAnswer(testQuestion.getId(), 3L, answer2Request);
 
         // Vote it up 2 times
-        answerService.voteAnswer(answer2.getId(), 101, VoteType.UPVOTE);
-        answerService.voteAnswer(answer2.getId(), 102, VoteType.UPVOTE);
+        answerService.voteAnswer(answer2.getId(), 101L, VoteType.UPVOTE);
+        answerService.voteAnswer(answer2.getId(), 102L, VoteType.UPVOTE);
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<AnswerResponse> topAnswers = answerService.getTopAnswers(pageable);
@@ -265,4 +270,5 @@ public class AnswerServiceIntegrationTest {
         assertEquals(answer1.getId(), topAnswers.getContent().get(0).getId());
     }
 }
+
 
