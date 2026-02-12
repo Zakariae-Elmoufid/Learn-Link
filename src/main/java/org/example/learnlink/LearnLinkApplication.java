@@ -25,5 +25,7 @@ public class LearnLinkApplication {
 
         SpringApplication.run(LearnLinkApplication.class, args);
     }
-
 }
+
+
+
