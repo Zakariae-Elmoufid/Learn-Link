@@ -1,5 +1,6 @@
 package org.example.learnlink.modules.community.service;
 
+import org.example.learnlink.common.service.RedisService;
 import org.example.learnlink.modules.community.dto.CreatePostRequest;
 import org.example.learnlink.modules.community.dto.PostResponse;
 import org.example.learnlink.modules.community.dto.SearchPostRequest;

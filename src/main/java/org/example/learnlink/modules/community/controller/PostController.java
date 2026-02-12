@@ -1,13 +1,13 @@
 package org.example.learnlink.modules.community.controller;
 
-import org.example.learnlink.modules.community.dto.CreatePostRequest;
-import org.example.learnlink.modules.community.dto.PostResponse;
-import org.example.learnlink.modules.community.dto.SearchPostRequest;
-import org.example.learnlink.modules.community.dto.UpdatePostRequest;
+import org.example.learnlink.common.service.RedisService;
+import org.example.learnlink.modules.community.dto.*;
 import org.example.learnlink.modules.community.entity.PostCategory;
+import org.example.learnlink.modules.community.mapper.PostMapper;
 import org.example.learnlink.modules.community.service.IPostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.mapstruct.Mapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,12 +18,14 @@ import org.springframework.web.bind.annotation.*;
 /**
  * REST Controller for Post management
  */
-@RestController
-@RequestMapping("/api/community/posts")
+@RestController@RequestMapping("/api/community/posts")
 @RequiredArgsConstructor
 public class PostController {
 
     private final IPostService postService;
+    private final RedisService redisService;
+    private final PostMapper mapper;
+
 
     /**
      * Create a new post
@@ -33,6 +35,7 @@ public class PostController {
     public ResponseEntity<PostResponse> createPost(
             @RequestHeader("X-User-Id") Long userId,
             @Valid @RequestBody CreatePostRequest request) {
+
         PostResponse response = postService.createPost(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -43,7 +46,15 @@ public class PostController {
      */
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponse> getPostById(@PathVariable Long postId) {
+        String cacheKey = "post:" + postId;
+        PostResponse cachedPost = (PostResponse) redisService.get(cacheKey);
+
+        if (cachedPost != null) {
+            System.out.println("Cache hit for postId: " );
+            return ResponseEntity.ok(cachedPost);
+        }
         PostResponse response = postService.getPostById(postId);
+        redisService.save(cacheKey, response, 3600);
         return ResponseEntity.ok(response);
     }
 
@@ -52,12 +63,28 @@ public class PostController {
      * GET /api/community/posts?page=0&size=20
      */
     @GetMapping
-    public ResponseEntity<Page<PostResponse>> getAllPosts(
+    public ResponseEntity<PageResponse<PostResponse>> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
+
+        String cacheKey = "posts:page:" + page + ":size:" + size;
+        PageResponse<PostResponse> cachedPosts = (PageResponse<PostResponse>) redisService.get(cacheKey);
+
+        if (cachedPosts != null) {
+            return ResponseEntity.ok(cachedPosts);
+        }
+
         Pageable pageable = PageRequest.of(page, size);
+
         Page<PostResponse> posts = postService.getAllPosts(pageable);
-        return ResponseEntity.ok(posts);
+
+        PageResponse<PostResponse> response =
+                mapper.toPageResponse(posts);
+
+        redisService.save(cacheKey, response, 1800);
+
+
+        return ResponseEntity.ok(response);
     }
 
     /**
