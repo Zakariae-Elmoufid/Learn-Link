@@ -6,6 +6,7 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class AddPointsRequest {
 
     @NotBlank(message = "Action type is required")
@@ -17,4 +18,6 @@ public class AddPointsRequest {
 
     @Size(max = 500, message = "Description cannot exceed 500 characters")
     private String description;
+
+
 }
