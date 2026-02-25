@@ -31,48 +31,9 @@ public class MessageController {
     private final IMessageService messageService;
     private final MessageMapper messageMapper;
 
-    /**
-     * Send a new message
-     * POST /api/messages
-     */
-    @PostMapping
-    public ResponseEntity<MessageResponse> sendMessage(
-            @RequestHeader("X-User-Id") Long userId,
-            @Valid @RequestBody SendMessageRequest request) {
 
-        log.info("User {} sending message to user {}", userId, request.getRecipientId());
-        MessageResponse response = messageService.sendMessage(userId, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
 
-    /**
-     * Get message by ID
-     * GET /api/messages/{messageId}
-     */
-    @GetMapping("/{messageId}")
-    public ResponseEntity<MessageResponse> getMessageById(
-            @RequestHeader("X-User-Id") Long userId,
-            @PathVariable Long messageId) {
 
-        MessageResponse response = messageService.getMessageById(messageId, userId);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Get conversation with another user
-     * GET /api/messages/conversation/{otherUserId}
-     */
-    @GetMapping("/conversation/{otherUserId}")
-    public ResponseEntity<PageResponse<MessageResponse>> getConversation(
-            @RequestHeader("X-User-Id") Long userId,
-            @PathVariable Long otherUserId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<MessageResponse> messages = messageService.getConversation(userId, otherUserId, pageable);
-        return ResponseEntity.ok(messageMapper.toPageResponse(messages));
-    }
 
     /**
      * Get all conversations for current user

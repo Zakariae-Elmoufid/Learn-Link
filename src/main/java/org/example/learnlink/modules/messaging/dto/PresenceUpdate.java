@@ -1,0 +1,22 @@
+package org.example.learnlink.modules.messaging.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+/**
+ * DTO for user presence/online status
+ */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class PresenceUpdate {
+
+    private Long userId;
+    private boolean online;
+    private LocalDateTime lastSeen;
+}
