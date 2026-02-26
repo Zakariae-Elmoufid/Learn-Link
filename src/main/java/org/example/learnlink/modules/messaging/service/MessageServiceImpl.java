@@ -63,6 +63,7 @@ public class MessageServiceImpl implements IMessageService {
 
         log.info("Message {} sent successfully", savedMessage.getId());
         return messageMapper.toResponse(savedMessage);
+
     }
 
     @Override

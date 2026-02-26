@@ -10,4 +10,8 @@ public class MessageNotFoundException extends ResourceNotFoundException {
     public MessageNotFoundException(Long messageId) {
         super("Message", "id", messageId);
     }
+
+    public MessageNotFoundException(String message) {
+        super(message);
+    }
 }

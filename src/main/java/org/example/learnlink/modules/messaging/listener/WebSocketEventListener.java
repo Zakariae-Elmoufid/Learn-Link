@@ -60,7 +60,7 @@ public class WebSocketEventListener {
             presenceService.setOnline(userId);
             
             // Broadcast online status to all subscribers
-            broadcastPresenceUpdate(userId,true);
+            broadcastPresenceUpdate(userId, true);
             
             log.info("User {} connected via WebSocket", userId);
         }
