@@ -7,11 +7,13 @@ import org.example.learnlink.modules.gamification.dto.AddPointsRequest;
 import org.example.learnlink.modules.gamification.service.GamificationService;
 import org.example.learnlink.modules.gamification.service.UserBadgeService;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
- * Event listener for community gamification events
- * This listener publishes events to a gamification service for points and badges
+ * Event listener for community gamification events.
+ * This listener publishes events to a gamification service for points and badges.
+ * All handlers are async to avoid blocking the main transaction.
  */
 @Slf4j
 @Component
@@ -25,6 +27,7 @@ public class CommunityGamificationListener {
     /**
      * Handle post created event - award points to author
      */
+    @Async
     @EventListener
     public void handlePostCreatedEvent(PostCreatedEvent event) {
         log.info("Post created event received: userId={}, postId={}, postType={}",
@@ -58,6 +61,7 @@ public class CommunityGamificationListener {
     /**
      * Handle question asked event - award points to author
      */
+    @Async
     @EventListener
     public void handleQuestionAskedEvent(QuestionAskedEvent event) {
         log.info("Question asked event received: userId={}, questionId={}",
@@ -79,6 +83,7 @@ public class CommunityGamificationListener {
     /**
      * Handle answer provided event - award points to author
      */
+    @Async
     @EventListener
     public void handleAnswerProvidedEvent(AnswerProvidedEvent event) {
         log.info("Answer provided event received: userId={}, answerId={}, questionId={}",
@@ -100,6 +105,7 @@ public class CommunityGamificationListener {
     /**
      * Handle answer accepted event - award bonus points to answer author
      */
+    @Async
     @EventListener
     public void handleAnswerAcceptedEvent(AnswerAcceptedEvent event) {
         log.info("Answer accepted event received: answerId={}, answerAuthorId={}, askerUserId={}",
@@ -125,6 +131,7 @@ public class CommunityGamificationListener {
     /**
      * Handle answer upvoted event - award points for helpful answer
      */
+    @Async
     @EventListener
     public void handleAnswerUpvotedEvent(AnswerUpvotedEvent event) {
         log.info("Answer upvoted event received: answerId={}, answerAuthorId={}, voterUserId={}",
@@ -146,6 +153,7 @@ public class CommunityGamificationListener {
     /**
      * Handle comment added event - award points to author
      */
+    @Async
     @EventListener
     public void handleCommentAddedEvent(CommentAddedEvent event) {
         log.info("Comment added event received: userId={}, commentId={}, postId={}, answerId={}",
@@ -167,6 +175,7 @@ public class CommunityGamificationListener {
     /**
      * Handle post liked event - award points to post author
      */
+    @Async
     @EventListener
     public void handlePostLikedEvent(PostLikedEvent event) {
         log.info("Post liked event received: postId={}, postAuthorId={}, likerUserId={}",

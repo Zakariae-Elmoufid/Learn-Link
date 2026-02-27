@@ -3,10 +3,14 @@ package org.example.learnlink.modules.email.listener;
 
 import org.example.learnlink.modules.auth.event.OnUserRegisteredEvent;
 import org.example.learnlink.modules.email.service.EmailService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+/**
+ * Listens for user registration events and sends verification emails.
+ * Async to avoid blocking the registration process.
+ */
 @Component
 public class UserRegistrationListener {
 
@@ -16,6 +20,7 @@ public class UserRegistrationListener {
         this.emailService = emailService;
     }
 
+    @Async
     @EventListener
     public void handleUserRegistered(OnUserRegisteredEvent event) {
         emailService.sendVerificationEmail(event.getUser());

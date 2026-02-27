@@ -5,24 +5,28 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.learnlink.modules.media.S3StorageService;
 import org.example.learnlink.modules.media.dto.UploadResult;
+import org.example.learnlink.modules.media.event.ProfileImageUploadedEvent;
 import org.example.learnlink.modules.user.event.UserProfileImageRequestedEvent;
-import org.example.learnlink.modules.user.repository.UserProfileRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Listens for profile image upload requests and handles S3 upload.
+ * After successful upload, fires ProfileImageUploadedEvent for the user module to consume.
+ * This decouples the media module from the user module's repository.
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class UserProfileImageListener {
 
     private final S3StorageService storageService;
-    private final UserProfileRepository userProfileRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Async
     @EventListener
-    @Transactional
     public void handle(UserProfileImageRequestedEvent event) {
         try {
             // Upload image to S3 using raw bytes (MultipartFile not available in async context)
@@ -33,16 +37,18 @@ public class UserProfileImageListener {
                     event.userProfileId()
             );
 
-            // Update the profile with the S3 key (we store key, generate presigned URL on read)
-            userProfileRepository.findByUserId(event.userProfileId())
-                    .ifPresent(profile -> {
-                        profile.setProfilePictureUrl(result.getKey());
-                        userProfileRepository.save(profile);
-                        log.info("Profile picture updated for user {}: {}", event.userProfileId(), result.getKey());
-                    });
+            // Fire event for user module to update the profile
+            eventPublisher.publishEvent(new ProfileImageUploadedEvent(
+                    event.userProfileId(),
+                    result.getKey()
+            ));
+
+            log.info("Profile image uploaded for user {}, S3 key: {}", 
+                    event.userProfileId(), result.getKey());
 
         } catch (Exception e) {
-            log.error("Failed to upload profile picture for user {}: {}", event.userProfileId(), e.getMessage(), e);
+            log.error("Failed to upload profile picture for user {}: {}", 
+                    event.userProfileId(), e.getMessage(), e);
         }
     }
 }
