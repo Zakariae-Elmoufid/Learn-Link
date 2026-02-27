@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.learnlink.modules.auth.security.CustomUserDetails;
 import org.example.learnlink.modules.messaging.dto.GroupMessageRequest;
 import org.example.learnlink.modules.messaging.dto.GroupMessageResponse;
 import org.example.learnlink.modules.messaging.dto.PageResponse;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,8 +45,9 @@ public class GroupChatController {
     public ResponseEntity<GroupMessageResponse> sendMessage(
             @Parameter(description = "ID of the study group") @PathVariable Long groupId,
             @Valid @RequestBody GroupMessageRequest request,
-            @RequestHeader("X-User-Id") Long userId
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+        Long userId = userDetails.getId();
         log.info("REST: User {} sending message to group {}", userId, groupId);
         
         GroupMessageResponse response = groupMessageService.sendMessage(userId, groupId, request);
@@ -69,8 +72,9 @@ public class GroupChatController {
             @Parameter(description = "ID of the study group") @PathVariable Long groupId,
             @Parameter(description = "Page number (0-indexed)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size,
-            @RequestHeader("X-User-Id") Long userId
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+        Long userId = userDetails.getId();
         log.debug("User {} fetching messages for group {}, page={}, size={}", userId, groupId, page, size);
         
         Page<GroupMessageResponse> messages = groupMessageService.getGroupMessages(
@@ -91,8 +95,9 @@ public class GroupChatController {
     @Operation(summary = "Mark all as read", description = "Mark all messages in the group as read")
     public ResponseEntity<Map<String, Integer>> markAllAsRead(
             @Parameter(description = "ID of the study group") @PathVariable Long groupId,
-            @RequestHeader("X-User-Id") Long userId
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+        Long userId = userDetails.getId();
         log.debug("User {} marking all messages as read in group {}", userId, groupId);
         
         int count = groupMessageService.markAllAsRead(userId, groupId);
@@ -109,8 +114,9 @@ public class GroupChatController {
     public ResponseEntity<Void> markMessageAsRead(
             @Parameter(description = "ID of the study group") @PathVariable Long groupId,
             @Parameter(description = "ID of the message") @PathVariable Long messageId,
-            @RequestHeader("X-User-Id") Long userId
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+        Long userId = userDetails.getId();
         log.debug("User {} marking message {} as read in group {}", userId, messageId, groupId);
         
         groupMessageService.markMessageAsRead(userId, messageId);
@@ -126,8 +132,9 @@ public class GroupChatController {
     @Operation(summary = "Get unread count", description = "Get number of unread messages in the group")
     public ResponseEntity<Map<String, Long>> getUnreadCount(
             @Parameter(description = "ID of the study group") @PathVariable Long groupId,
-            @RequestHeader("X-User-Id") Long userId
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+        Long userId = userDetails.getId();
         Long count = groupMessageService.getUnreadCount(userId, groupId);
         return ResponseEntity.ok(Map.of("unreadCount", count));
     }

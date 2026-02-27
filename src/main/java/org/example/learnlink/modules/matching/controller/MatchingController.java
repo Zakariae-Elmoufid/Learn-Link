@@ -1,9 +1,11 @@
 package org.example.learnlink.modules.matching.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.learnlink.modules.auth.security.CustomUserDetails;
 import org.example.learnlink.modules.matching.dto.response.MatchSuggestionResponse;
 import org.example.learnlink.modules.matching.service.IMatchingService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -32,8 +34,9 @@ public class MatchingController {
      */
     @GetMapping("/suggestions")
     public ResponseEntity<List<MatchSuggestionResponse>> getSuggestions(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(defaultValue = "10") int limit) {
+        Long userId = userDetails.getId();
 
         // Cap limit at 50
         int cappedLimit = Math.min(limit, 50);
@@ -53,9 +56,10 @@ public class MatchingController {
      */
     @GetMapping("/suggestions/subject/{subjectId}")
     public ResponseEntity<List<MatchSuggestionResponse>> getSuggestionsBySubject(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long subjectId,
             @RequestParam(defaultValue = "10") int limit) {
+        Long userId = userDetails.getId();
 
         int cappedLimit = Math.min(limit, 50);
 
@@ -68,14 +72,14 @@ public class MatchingController {
      * Calculate compatibility score between current user and another user.
      * GET /api/matching/compatibility/{otherUserId}
      *
-     * @param userId      the ID of the authenticated user
      * @param otherUserId the ID of the other user
      * @return compatibility score and breakdown
      */
     @GetMapping("/compatibility/{otherUserId}")
     public ResponseEntity<Map<String, Object>> getCompatibility(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long otherUserId) {
+        Long userId = userDetails.getId();
 
         BigDecimal score = matchingService.calculateCompatibility(userId, otherUserId);
 

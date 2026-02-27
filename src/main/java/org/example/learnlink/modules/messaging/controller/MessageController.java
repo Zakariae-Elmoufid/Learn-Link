@@ -3,6 +3,7 @@ package org.example.learnlink.modules.messaging.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.learnlink.modules.auth.security.CustomUserDetails;
 import org.example.learnlink.modules.messaging.dto.ConversationResponse;
 import org.example.learnlink.modules.messaging.dto.MessageResponse;
 import org.example.learnlink.modules.messaging.dto.PageResponse;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,8 +41,9 @@ public class MessageController {
      */
     @PostMapping
     public ResponseEntity<MessageResponse> sendMessage(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody SendMessageRequest request) {
+        Long userId = userDetails.getId();
 
         log.info("User {} sending message to user {}", userId, request.getRecipientId());
         MessageResponse response = messageService.sendMessage(userId, request);
@@ -67,8 +70,9 @@ public class MessageController {
      */
     @GetMapping("/{messageId}")
     public ResponseEntity<MessageResponse> getMessageById(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long messageId) {
+        Long userId = userDetails.getId();
 
         MessageResponse response = messageService.getMessageById(messageId, userId);
         return ResponseEntity.ok(response);
@@ -80,10 +84,11 @@ public class MessageController {
      */
     @GetMapping("/conversation/{otherUserId}")
     public ResponseEntity<PageResponse<MessageResponse>> getConversation(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long otherUserId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
+        Long userId = userDetails.getId();
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<MessageResponse> messages = messageService.getConversation(userId, otherUserId, pageable);
@@ -96,7 +101,8 @@ public class MessageController {
      */
     @GetMapping("/conversations")
     public ResponseEntity<List<ConversationResponse>> getUserConversations(
-            @RequestHeader("X-User-Id") Long userId) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
 
         List<ConversationResponse> conversations = messageService.getUserConversations(userId);
         return ResponseEntity.ok(conversations);
@@ -108,8 +114,9 @@ public class MessageController {
      */
     @PutMapping("/{messageId}/read")
     public ResponseEntity<Void> markAsRead(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long messageId) {
+        Long userId = userDetails.getId();
 
         messageService.markAsRead(messageId, userId);
         return ResponseEntity.ok().build();
@@ -121,8 +128,9 @@ public class MessageController {
      */
     @PutMapping("/conversation/{senderId}/read")
     public ResponseEntity<Void> markConversationAsRead(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long senderId) {
+        Long userId = userDetails.getId();
 
         messageService.markConversationAsRead(userId, senderId);
         return ResponseEntity.ok().build();
@@ -134,8 +142,9 @@ public class MessageController {
      */
     @DeleteMapping("/{messageId}")
     public ResponseEntity<Void> deleteMessage(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long messageId) {
+        Long userId = userDetails.getId();
 
         messageService.deleteMessage(messageId, userId);
         return ResponseEntity.noContent().build();
@@ -147,8 +156,9 @@ public class MessageController {
      */
     @DeleteMapping("/conversation/{otherUserId}")
     public ResponseEntity<Void> deleteConversation(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long otherUserId) {
+        Long userId = userDetails.getId();
 
         messageService.deleteConversation(userId, otherUserId);
         return ResponseEntity.noContent().build();
@@ -160,7 +170,8 @@ public class MessageController {
      */
     @GetMapping("/unread/count")
     public ResponseEntity<Long> getUnreadCount(
-            @RequestHeader("X-User-Id") Long userId) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
 
         Long count = messageService.countUnreadMessages(userId);
         return ResponseEntity.ok(count);
@@ -172,8 +183,9 @@ public class MessageController {
      */
     @GetMapping("/conversation/{senderId}/unread/count")
     public ResponseEntity<Long> getUnreadCountInConversation(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long senderId) {
+        Long userId = userDetails.getId();
 
         Long count = messageService.countUnreadInConversation(userId, senderId);
         return ResponseEntity.ok(count);

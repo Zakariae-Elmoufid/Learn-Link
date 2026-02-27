@@ -1,6 +1,7 @@
 package org.example.learnlink.modules.community.controller;
 
 import org.example.learnlink.common.service.RedisService;
+import org.example.learnlink.modules.auth.security.CustomUserDetails;
 import org.example.learnlink.modules.community.dto.*;
 import org.example.learnlink.modules.community.entity.PostCategory;
 import org.example.learnlink.modules.community.mapper.PostMapper;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -33,10 +35,11 @@ public class PostController {
      */
     @PostMapping
     public ResponseEntity<PostResponse> createPost(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody CreatePostRequest request) {
-
+            Long userId = userDetails.getId();
         PostResponse response = postService.createPost(userId, request);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -168,8 +171,9 @@ public class PostController {
     @PutMapping("/{postId}")
     public ResponseEntity<PostResponse> updatePost(
             @PathVariable Long postId,
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody UpdatePostRequest request) {
+        Long userId = userDetails.getId();
         PostResponse response = postService.updatePost(postId, userId, request);
         return ResponseEntity.ok(response);
     }
@@ -181,7 +185,8 @@ public class PostController {
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deletePost(
             @PathVariable Long postId,
-            @RequestHeader("X-User-Id") Long userId) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
         postService.deletePost(postId, userId);
         return ResponseEntity.noContent().build();
     }
@@ -193,7 +198,8 @@ public class PostController {
     @PostMapping("/{postId}/like")
     public ResponseEntity<Void> likePost(
             @PathVariable Long postId,
-            @RequestHeader("X-User-Id") Long userId) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
         postService.likePost(postId, userId);
         return ResponseEntity.ok().build();
     }
@@ -205,7 +211,8 @@ public class PostController {
     @DeleteMapping("/{postId}/like")
     public ResponseEntity<Void> unlikePost(
             @PathVariable Long postId,
-            @RequestHeader("X-User-Id") Long userId) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
         postService.unlikePost(postId, userId);
         return ResponseEntity.ok().build();
     }

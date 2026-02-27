@@ -1,5 +1,6 @@
 package org.example.learnlink.modules.planner.controller;
 
+import org.example.learnlink.modules.auth.security.CustomUserDetails;
 import org.example.learnlink.modules.planner.dto.TaskRequest;
 import org.example.learnlink.modules.planner.dto.TaskResponse;
 import org.example.learnlink.modules.planner.service.ITaskService;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -29,8 +31,9 @@ public class TaskController {
      */
     @PostMapping
     public ResponseEntity<TaskResponse> createTask(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody TaskRequest request) {
+        Long userId = userDetails.getId();
         TaskResponse response = taskService.createTask(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -50,7 +53,9 @@ public class TaskController {
      * GET /api/planner/tasks
      */
     @GetMapping
-    public ResponseEntity<List<TaskResponse>> getUserTasks(@RequestHeader("X-User-Id") Long userId) {
+    public ResponseEntity<List<TaskResponse>> getUserTasks(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
         List<TaskResponse> tasks = taskService.getUserTasks(userId);
         return ResponseEntity.ok(tasks);
     }
@@ -60,7 +65,9 @@ public class TaskController {
      * GET /api/planner/tasks/active
      */
     @GetMapping("/active")
-    public ResponseEntity<List<TaskResponse>> getActiveTasks(@RequestHeader("X-User-Id") Long userId) {
+    public ResponseEntity<List<TaskResponse>> getActiveTasks(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
         List<TaskResponse> tasks = taskService.getActiveTasks(userId);
         return ResponseEntity.ok(tasks);
     }
@@ -70,7 +77,9 @@ public class TaskController {
      * GET /api/planner/tasks/today
      */
     @GetMapping("/today")
-    public ResponseEntity<List<TaskResponse>> getTodayTasks(@RequestHeader("X-User-Id") Long userId) {
+    public ResponseEntity<List<TaskResponse>> getTodayTasks(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
         List<TaskResponse> tasks = taskService.getTodayTasks(userId);
         return ResponseEntity.ok(tasks);
     }
@@ -81,9 +90,10 @@ public class TaskController {
      */
     @GetMapping("/range")
     public ResponseEntity<List<TaskResponse>> getTasksByDateRange(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
+        Long userId = userDetails.getId();
         List<TaskResponse> tasks = taskService.getTasksByDateRange(userId, startTime, endTime);
         return ResponseEntity.ok(tasks);
     }
@@ -93,7 +103,9 @@ public class TaskController {
      * GET /api/planner/tasks/overdue
      */
     @GetMapping("/overdue")
-    public ResponseEntity<List<TaskResponse>> getOverdueTasks(@RequestHeader("X-User-Id") Long userId) {
+    public ResponseEntity<List<TaskResponse>> getOverdueTasks(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
         List<TaskResponse> tasks = taskService.getOverdueTasks(userId);
         return ResponseEntity.ok(tasks);
     }

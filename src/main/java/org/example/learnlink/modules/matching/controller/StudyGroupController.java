@@ -2,6 +2,7 @@ package org.example.learnlink.modules.matching.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.learnlink.modules.auth.security.CustomUserDetails;
 import org.example.learnlink.modules.matching.dto.request.CreateStudyGroupDto;
 import org.example.learnlink.modules.matching.dto.request.UpdateStudyGroupDto;
 import org.example.learnlink.modules.matching.dto.response.GroupMemberResponse;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,9 +38,9 @@ public class StudyGroupController {
      */
     @PostMapping
     public ResponseEntity<StudyGroupResponse> createGroup(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody CreateStudyGroupDto dto) {
-
+        Long userId = userDetails.getId();
         StudyGroupResponse response = studyGroupService.createGroup(userId, dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -49,9 +51,9 @@ public class StudyGroupController {
      */
     @GetMapping("/{groupId}")
     public ResponseEntity<StudyGroupResponse> getGroup(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long groupId) {
-
+        Long userId = userDetails.getId();
         StudyGroupResponse response = studyGroupService.getGroup(groupId, userId);
         return ResponseEntity.ok(response);
     }
@@ -62,9 +64,9 @@ public class StudyGroupController {
      */
     @GetMapping("/{groupId}/full")
     public ResponseEntity<StudyGroupResponse> getGroupWithMembers(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long groupId) {
-
+        Long userId = userDetails.getId();
         StudyGroupResponse response = studyGroupService.getGroupWithMembers(groupId, userId);
         return ResponseEntity.ok(response);
     }
@@ -75,10 +77,10 @@ public class StudyGroupController {
      */
     @PutMapping("/{groupId}")
     public ResponseEntity<StudyGroupResponse> updateGroup(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long groupId,
             @Valid @RequestBody UpdateStudyGroupDto dto) {
-
+        Long userId = userDetails.getId();
         StudyGroupResponse response = studyGroupService.updateGroup(groupId, userId, dto);
         return ResponseEntity.ok(response);
     }
@@ -89,9 +91,9 @@ public class StudyGroupController {
      */
     @DeleteMapping("/{groupId}")
     public ResponseEntity<Void> deleteGroup(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long groupId) {
-
+        Long userId = userDetails.getId();
         studyGroupService.deleteGroup(groupId, userId);
         return ResponseEntity.noContent().build();
     }
@@ -147,8 +149,8 @@ public class StudyGroupController {
      */
     @GetMapping("/my")
     public ResponseEntity<List<StudyGroupResponse>> getMyGroups(
-            @RequestHeader("X-User-Id") Long userId) {
-
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
         List<StudyGroupResponse> groups = studyGroupService.getMyGroups(userId);
         return ResponseEntity.ok(groups);
     }
@@ -159,8 +161,8 @@ public class StudyGroupController {
      */
     @GetMapping("/owned")
     public ResponseEntity<List<StudyGroupResponse>> getOwnedGroups(
-            @RequestHeader("X-User-Id") Long userId) {
-
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
         List<StudyGroupResponse> groups = studyGroupService.getOwnedGroups(userId);
         return ResponseEntity.ok(groups);
     }
@@ -173,9 +175,9 @@ public class StudyGroupController {
      */
     @PostMapping("/{groupId}/join")
     public ResponseEntity<Void> joinGroup(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long groupId) {
-
+        Long userId = userDetails.getId();
         studyGroupService.joinGroup(groupId, userId);
         return ResponseEntity.ok().build();
     }
@@ -186,9 +188,9 @@ public class StudyGroupController {
      */
     @PostMapping("/{groupId}/request-join")
     public ResponseEntity<Void> requestToJoin(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long groupId) {
-
+        Long userId = userDetails.getId();
         studyGroupService.requestToJoin(groupId, userId);
         return ResponseEntity.accepted().build();
     }
@@ -199,9 +201,9 @@ public class StudyGroupController {
      */
     @PostMapping("/{groupId}/leave")
     public ResponseEntity<Void> leaveGroup(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long groupId) {
-
+        Long userId = userDetails.getId();
         studyGroupService.leaveGroup(groupId, userId);
         return ResponseEntity.ok().build();
     }
@@ -226,9 +228,9 @@ public class StudyGroupController {
      */
     @GetMapping("/{groupId}/requests")
     public ResponseEntity<List<GroupMemberResponse>> getPendingRequests(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long groupId) {
-
+        Long userId = userDetails.getId();
         List<GroupMemberResponse> requests = studyGroupService.getPendingRequests(groupId, userId);
         return ResponseEntity.ok(requests);
     }
@@ -239,10 +241,10 @@ public class StudyGroupController {
      */
     @PostMapping("/{groupId}/requests/{requesterId}/approve")
     public ResponseEntity<Void> approveJoinRequest(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long groupId,
             @PathVariable Long requesterId) {
-
+        Long userId = userDetails.getId();
         studyGroupService.approveJoinRequest(groupId, userId, requesterId);
         return ResponseEntity.ok().build();
     }
@@ -253,10 +255,10 @@ public class StudyGroupController {
      */
     @PostMapping("/{groupId}/requests/{requesterId}/reject")
     public ResponseEntity<Void> rejectJoinRequest(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long groupId,
             @PathVariable Long requesterId) {
-
+        Long userId = userDetails.getId();
         studyGroupService.rejectJoinRequest(groupId, userId, requesterId);
         return ResponseEntity.ok().build();
     }
@@ -267,10 +269,10 @@ public class StudyGroupController {
      */
     @DeleteMapping("/{groupId}/members/{memberId}")
     public ResponseEntity<Void> removeMember(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long groupId,
             @PathVariable Long memberId) {
-
+        Long userId = userDetails.getId();
         studyGroupService.removeMember(groupId, userId, memberId);
         return ResponseEntity.noContent().build();
     }
@@ -281,11 +283,11 @@ public class StudyGroupController {
      */
     @PutMapping("/{groupId}/members/{memberId}/role")
     public ResponseEntity<Void> updateMemberRole(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long groupId,
             @PathVariable Long memberId,
             @RequestParam GroupRole role) {
-
+        Long userId = userDetails.getId();
         studyGroupService.updateMemberRole(groupId, userId, memberId, role);
         return ResponseEntity.ok().build();
     }

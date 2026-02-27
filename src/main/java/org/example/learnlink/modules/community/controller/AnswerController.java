@@ -1,5 +1,6 @@
 package org.example.learnlink.modules.community.controller;
 
+import org.example.learnlink.modules.auth.security.CustomUserDetails;
 import org.example.learnlink.modules.community.dto.AnswerResponse;
 import org.example.learnlink.modules.community.dto.ProvideAnswerRequest;
 import org.example.learnlink.modules.community.entity.VoteType;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,9 +34,10 @@ public class AnswerController {
      */
     @PostMapping
     public ResponseEntity<AnswerResponse> provideAnswer(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam Long questionId,
             @Valid @RequestBody ProvideAnswerRequest request) {
+        Long userId = userDetails.getId();
         AnswerResponse response = answerService.provideAnswer(questionId, userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -93,8 +96,9 @@ public class AnswerController {
     @PutMapping("/{answerId}")
     public ResponseEntity<AnswerResponse> updateAnswer(
             @PathVariable Long answerId,
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody ProvideAnswerRequest request) {
+        Long userId = userDetails.getId();
         AnswerResponse response = answerService.updateAnswer(answerId, userId, request);
         return ResponseEntity.ok(response);
     }
@@ -106,7 +110,8 @@ public class AnswerController {
     @DeleteMapping("/{answerId}")
     public ResponseEntity<Void> deleteAnswer(
             @PathVariable Long answerId,
-            @RequestHeader("X-User-Id") Long userId) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
         answerService.deleteAnswer(answerId, userId);
         return ResponseEntity.noContent().build();
     }
@@ -120,7 +125,8 @@ public class AnswerController {
     public ResponseEntity<Void> acceptAnswer(
             @PathVariable Long answerId,
             @RequestParam Long questionId,
-            @RequestHeader("X-User-Id") Long userId) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
         answerService.acceptAnswer(questionId, answerId, userId);
         return ResponseEntity.ok().build();
     }
@@ -133,8 +139,9 @@ public class AnswerController {
     @PostMapping("/{answerId}/vote")
     public ResponseEntity<Void> voteAnswer(
             @PathVariable Long answerId,
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam VoteType voteType) {
+        Long userId = userDetails.getId();
         answerService.voteAnswer(answerId, userId, voteType);
         return ResponseEntity.ok().build();
     }
@@ -146,7 +153,8 @@ public class AnswerController {
     @DeleteMapping("/{answerId}/vote")
     public ResponseEntity<Void> removeVote(
             @PathVariable Long answerId,
-            @RequestHeader("X-User-Id") Long userId) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
         answerService.removeVote(answerId, userId);
         return ResponseEntity.ok().build();
     }

@@ -3,13 +3,14 @@ package org.example.learnlink.modules.gamification.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.learnlink.modules.auth.security.CustomUserDetails;
 import org.example.learnlink.modules.gamification.dto.AddPointsRequest;
 import org.example.learnlink.modules.gamification.dto.UserPublicProfileResponse;
 import org.example.learnlink.modules.gamification.dto.UserScoreResponse;
 import org.example.learnlink.modules.gamification.service.GamificationService;
-import org.example.learnlink.modules.planner.dto.TaskRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,7 +22,9 @@ public class GamificationController
 
 
     @GetMapping("/score")
-    public ResponseEntity<UserScoreResponse> getMyScore( @RequestHeader("X-User-Id") Long userId) {
+    public ResponseEntity<UserScoreResponse> getMyScore(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
         UserScoreResponse score = gamificationService.getUserScore(userId);
         return ResponseEntity.ok(score);
     }

@@ -1,5 +1,6 @@
 package org.example.learnlink.modules.community.controller;
 
+import org.example.learnlink.modules.auth.security.CustomUserDetails;
 import org.example.learnlink.modules.community.dto.AskQuestionRequest;
 import org.example.learnlink.modules.community.dto.QuestionResponse;
 import org.example.learnlink.modules.community.service.IQuestionService;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -28,8 +30,9 @@ public class QuestionController {
      */
     @PostMapping
     public ResponseEntity<QuestionResponse> askQuestion(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody AskQuestionRequest request) {
+        Long userId = userDetails.getId();
         QuestionResponse response = questionService.askQuestion(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -131,8 +134,9 @@ public class QuestionController {
     @PutMapping("/{questionId}")
     public ResponseEntity<QuestionResponse> updateQuestion(
             @PathVariable Long questionId,
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody AskQuestionRequest request) {
+        Long userId = userDetails.getId();
         QuestionResponse response = questionService.updateQuestion(questionId, userId, request);
         return ResponseEntity.ok(response);
     }
@@ -144,7 +148,8 @@ public class QuestionController {
     @DeleteMapping("/{questionId}")
     public ResponseEntity<Void> deleteQuestion(
             @PathVariable Long questionId,
-            @RequestHeader("X-User-Id") Long userId) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
         questionService.deleteQuestion(questionId, userId);
         return ResponseEntity.noContent().build();
     }

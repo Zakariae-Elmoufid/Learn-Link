@@ -3,10 +3,12 @@ package org.example.learnlink.modules.messaging.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.example.learnlink.modules.auth.security.CustomUserDetails;
 import org.example.learnlink.modules.media.S3StorageService;
 import org.example.learnlink.modules.media.dto.UploadResult;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,8 +29,9 @@ public class DirectChatAttachmentController {
     public ResponseEntity<UploadResult> uploadAttachment(
             @PathVariable Long conversationId,
             @RequestParam("file") MultipartFile file,
-            @RequestHeader("X-User-Id") Long userId
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+        Long userId = userDetails.getId();
         String tempMessageId = UUID.randomUUID().toString();
         UploadResult result = s3StorageService.uploadDirectChatAttachment(
                 file, conversationId, tempMessageId);

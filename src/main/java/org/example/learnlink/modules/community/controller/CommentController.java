@@ -1,5 +1,6 @@
 package org.example.learnlink.modules.community.controller;
 
+import org.example.learnlink.modules.auth.security.CustomUserDetails;
 import org.example.learnlink.modules.community.dto.AddCommentRequest;
 import org.example.learnlink.modules.community.dto.CommentResponse;
 import org.example.learnlink.modules.community.service.ICommentService;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,8 +33,9 @@ public class CommentController {
     @PostMapping("/post/{postId}")
     public ResponseEntity<CommentResponse> addCommentToPost(
             @PathVariable Long postId,
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody AddCommentRequest request) {
+        Long userId = userDetails.getId();
         CommentResponse response = commentService.addCommentToPost(postId, userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -44,8 +47,9 @@ public class CommentController {
     @PostMapping("/answer/{answerId}")
     public ResponseEntity<CommentResponse> addCommentToAnswer(
             @PathVariable Long answerId,
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody AddCommentRequest request) {
+        Long userId = userDetails.getId();
         CommentResponse response = commentService.addCommentToAnswer(answerId, userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -101,8 +105,9 @@ public class CommentController {
     @PutMapping("/{commentId}")
     public ResponseEntity<CommentResponse> updateComment(
             @PathVariable Long commentId,
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody AddCommentRequest request) {
+        Long userId = userDetails.getId();
         CommentResponse response = commentService.updateComment(commentId, userId, request);
         return ResponseEntity.ok(response);
     }
@@ -114,7 +119,8 @@ public class CommentController {
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> deleteComment(
             @PathVariable Long commentId,
-            @RequestHeader("X-User-Id") Long userId) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
         commentService.deleteComment(commentId, userId);
         return ResponseEntity.noContent().build();
     }
@@ -126,7 +132,8 @@ public class CommentController {
     @PostMapping("/{commentId}/like")
     public ResponseEntity<Void> likeComment(
             @PathVariable Long commentId,
-            @RequestHeader("X-User-Id") Long userId) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
         commentService.likeComment(commentId, userId);
         return ResponseEntity.ok().build();
     }
@@ -138,7 +145,8 @@ public class CommentController {
     @DeleteMapping("/{commentId}/like")
     public ResponseEntity<Void> unlikeComment(
             @PathVariable Long commentId,
-            @RequestHeader("X-User-Id") Long userId) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
         commentService.unlikeComment(commentId, userId);
         return ResponseEntity.ok().build();
     }
