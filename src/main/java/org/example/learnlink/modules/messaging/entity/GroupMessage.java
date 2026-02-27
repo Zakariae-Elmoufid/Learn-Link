@@ -57,8 +57,8 @@ public class GroupMessage {
     /**
      * URL to attached file (if any)
      */
-    @Column(name = "attachment_url", length = 500)
-    private String attachmentUrl;
+    @Column(name = "attachment_key")
+    private String attachmentKey;
 
     /**
      * Original filename of attachment

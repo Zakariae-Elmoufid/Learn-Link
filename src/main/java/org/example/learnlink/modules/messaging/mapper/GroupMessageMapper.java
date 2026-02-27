@@ -29,7 +29,7 @@ public class GroupMessageMapper {
                 // senderName and senderAvatarUrl should be populated by the service layer
                 .content(message.getContent())
                 .type(message.getMessageType())
-                .attachmentUrl(message.getAttachmentUrl())
+                .attachmentUrl(message.getAttachmentKey())
                 .attachmentName(message.getAttachmentName())
                 .createdAt(message.getCreatedAt())
                 .updatedAt(message.getUpdatedAt())
@@ -55,7 +55,7 @@ public class GroupMessageMapper {
                 .senderId(message.getSenderId())
                 .content(message.getContent())
                 .type(message.getMessageType())
-                .attachmentUrl(message.getAttachmentUrl())
+                .attachmentUrl(message.getAttachmentKey())
                 .attachmentName(message.getAttachmentName())
                 .createdAt(message.getCreatedAt())
                 .updatedAt(message.getUpdatedAt())

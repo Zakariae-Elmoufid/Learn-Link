@@ -45,8 +45,8 @@ public class Message {
     @Builder.Default
     private MessageStatus status = MessageStatus.SENT;
 
-    @Column(name = "attachment_url")
-    private String attachmentUrl;
+    @Column(name = "attachment_key")
+    private String attachmentKey;
 
     @Column(name = "attachment_name")
     private String attachmentName;

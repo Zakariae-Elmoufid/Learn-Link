@@ -46,7 +46,7 @@ public class MessageServiceImpl implements IMessageService {
                 .content(request.getContent())
                 .messageType(request.getType())
                 .status(MessageStatus.SENT)
-                .attachmentUrl(request.getAttachmentUrl())
+                .attachmentKey(request.getAttachmentUrl())
                 .attachmentName(request.getAttachmentName())
                 .build();
 

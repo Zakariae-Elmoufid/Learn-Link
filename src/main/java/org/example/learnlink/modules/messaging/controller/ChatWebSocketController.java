@@ -33,7 +33,7 @@ public class ChatWebSocketController {
      */
     @MessageMapping("/chat.send")
     public void sendMessage(@Payload ChatMessageRequest chatMessage, Principal principal) {
-        Long senderId = getUserId(principal);ws://localhost:8080/chat?user=Zakaria
+        Long senderId = getUserId(principal);
         log.debug("WebSocket message from user {} to user {}", senderId, chatMessage.getRecipientId());
 
         // Convert to SendMessageRequest and save via service
@@ -46,8 +46,8 @@ public class ChatWebSocketController {
                 .build();
 
         // Save message and get response
+        log.info("SenderId: {}, RecipientId: {}", senderId, chatMessage.getRecipientId());
         MessageResponse response = messageService.sendMessage(senderId, request);
-
         // Send message to recipient in real-time
         // The recipient subscribes to /user/queue/messages
         // Spring resolves /user/{recipientId}/queue/messages automatically

@@ -58,7 +58,7 @@ public class GroupMessageServiceImpl implements IGroupMessageService {
                 .senderId(senderId)
                 .content(request.getContent())
                 .messageType(request.getType())
-                .attachmentUrl(request.getAttachmentUrl())
+                .attachmentKey(request.getAttachmentUrl())
                 .attachmentName(request.getAttachmentName())
                 .build();
 
