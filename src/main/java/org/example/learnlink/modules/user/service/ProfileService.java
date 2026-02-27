@@ -1,6 +1,7 @@
 package org.example.learnlink.modules.user.service;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.learnlink.modules.user.dto.UserProfileCreate;
 import org.example.learnlink.modules.user.dto.UserProfileResponse;
 import org.example.learnlink.modules.user.entity.StudentSubject;
@@ -14,10 +15,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Base64;
+import java.io.IOException;
 import java.util.List;
 
 @Service
+@Slf4j
 public class ProfileService {
 
     @Autowired
@@ -39,7 +41,6 @@ public class ProfileService {
 
         UserProfile userProfile = UserProfile.builder()
                 .userId(UserId)
-                .profilePictureUrl(image.getOriginalFilename())
                 .bio(request.bio())
                 .firstName(request.firstName())
                 .lastName(request.lastName())
@@ -49,9 +50,23 @@ public class ProfileService {
 
         UserProfile savedUserProfile = userProfileRepository.save(userProfile);
 
-            eventPublisher.publishEvent(
-                    new UserProfileImageRequestedEvent(savedUserProfile.getUserId(), image)
-            );
+        // Only publish event if image is provided
+        if (image != null && !image.isEmpty()) {
+            try {
+                // Read bytes BEFORE async processing (MultipartFile not available after request ends)
+                byte[] imageData = image.getBytes();
+                eventPublisher.publishEvent(
+                        new UserProfileImageRequestedEvent(
+                                savedUserProfile.getUserId(),
+                                imageData,
+                                image.getOriginalFilename(),
+                                image.getContentType()
+                        )
+                );
+            } catch (IOException e) {
+                log.error("Failed to read image file for user {}: {}", UserId, e.getMessage());
+            }
+        }
 
         return mapper.toUserProfileResponse(savedUserProfile);
 
