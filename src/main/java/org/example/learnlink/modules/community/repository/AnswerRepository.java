@@ -48,5 +48,17 @@ public interface AnswerRepository extends JpaRepository<Answer, Long> {
      * Check if answer exists for question by user
      */
     boolean existsByQuestionIdAndUserId(Long questionId, Long userId);
+
+    // Moderation queries
+    
+    /**
+     * Find all hidden answers
+     */
+    Page<Answer> findByHiddenTrue(Pageable pageable);
+
+    /**
+     * Find all visible (not hidden) answers
+     */
+    Page<Answer> findByHiddenFalse(Pageable pageable);
 }
 

@@ -73,5 +73,24 @@ public interface PostRepository extends JpaRepository<Post, Long> {
         @Param("type") PostType type,
         Pageable pageable
     );
+    
+    // Admin statistics queries
+    
+    /**
+     * Count posts created after a specific date
+     */
+    long countByCreatedAtAfter(java.time.LocalDateTime since);
+
+    // Moderation queries
+    
+    /**
+     * Find all hidden posts
+     */
+    Page<Post> findByHiddenTrue(Pageable pageable);
+
+    /**
+     * Find all visible (not hidden) posts
+     */
+    Page<Post> findByHiddenFalse(Pageable pageable);
 }
 

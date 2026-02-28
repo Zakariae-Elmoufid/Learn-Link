@@ -49,5 +49,17 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
      */
     @Query("SELECT q FROM Question q ORDER BY q.viewCount DESC")
     Page<Question> findMostViewedQuestions(Pageable pageable);
+
+    // Moderation queries
+    
+    /**
+     * Find all hidden questions
+     */
+    Page<Question> findByHiddenTrue(Pageable pageable);
+
+    /**
+     * Find all visible (not hidden) questions
+     */
+    Page<Question> findByHiddenFalse(Pageable pageable);
 }
 

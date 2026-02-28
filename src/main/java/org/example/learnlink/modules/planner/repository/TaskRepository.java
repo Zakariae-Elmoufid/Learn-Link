@@ -75,4 +75,11 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
             @Param("userId") Long userId,
             @Param("dayStart") LocalDateTime dayStart,
             @Param("dayEnd") LocalDateTime dayEnd);
+    
+    // Admin statistics queries
+    
+    /**
+     * Count all completed tasks
+     */
+    long countByCompletedTrue();
 }

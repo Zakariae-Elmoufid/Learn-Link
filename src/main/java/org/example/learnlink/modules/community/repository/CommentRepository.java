@@ -47,5 +47,17 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Query("SELECT c FROM Comment c WHERE c.postId IN " +
            "(SELECT p.id FROM Post p WHERE p.userId = :userId)")
     Page<Comment> findCommentsOnUserPosts(@Param("userId") Long userId, Pageable pageable);
+
+    // Moderation queries
+    
+    /**
+     * Find all hidden comments
+     */
+    Page<Comment> findByHiddenTrue(Pageable pageable);
+
+    /**
+     * Find all visible (not hidden) comments
+     */
+    Page<Comment> findByHiddenFalse(Pageable pageable);
 }
 

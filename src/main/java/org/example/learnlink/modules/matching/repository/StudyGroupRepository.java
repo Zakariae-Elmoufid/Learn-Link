@@ -59,4 +59,11 @@ public interface StudyGroupRepository extends JpaRepository<StudyGroup, Long> {
      */
     @Query("SELECT g FROM StudyGroup g LEFT JOIN FETCH g.memberships WHERE g.id = :groupId")
     Optional<StudyGroup> findByIdWithMemberships(@Param("groupId") Long groupId);
+    
+    // Admin statistics queries
+    
+    /**
+     * Count groups by status
+     */
+    long countByStatus(GroupStatus status);
 }
