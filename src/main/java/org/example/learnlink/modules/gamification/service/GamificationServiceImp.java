@@ -8,8 +8,10 @@ import org.example.learnlink.modules.gamification.dto.AddPointsRequest;
 import org.example.learnlink.modules.gamification.dto.UserPublicProfileResponse;
 import org.example.learnlink.modules.gamification.dto.UserScoreResponse;
 import org.example.learnlink.modules.gamification.entity.UserScore;
+import org.example.learnlink.modules.gamification.event.PointsAwardedEvent;
 import org.example.learnlink.modules.gamification.exception.UserScoreNotFoundException;
 import org.example.learnlink.modules.gamification.repository.UserScoreRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,7 @@ public class GamificationServiceImp  implements    GamificationService {
     private final UserScoreRepository userScoreRepository;
     private final UserBadgeService userBadgeService;
     private final LeaderboardService leaderboardService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public UserScore addPoints(Long userId, AddPointsRequest request) {
@@ -42,6 +45,9 @@ public class GamificationServiceImp  implements    GamificationService {
         int previousLevel = userScore.getLevel();
         userScore.addPoints(request.getPoints());
         userScore = userScoreRepository.save(userScore);
+
+        // Publish event for admin stats tracking
+        eventPublisher.publishEvent(new PointsAwardedEvent(this, userId, request.getPoints(), request.getActionType()));
 
         log.info("Points added successfully. New total: {}, Level: {}",
                 userScore.getTotalPoints(), userScore.getLevel());

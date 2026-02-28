@@ -5,11 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.learnlink.modules.gamification.dto.UserBadgeResponse;
 import org.example.learnlink.modules.gamification.entity.Badge;
 import org.example.learnlink.modules.gamification.entity.UserBadge;
+import org.example.learnlink.modules.gamification.event.BadgeEarnedEvent;
 import org.example.learnlink.modules.gamification.exception.BadgeNotFoundException;
 import org.example.learnlink.modules.gamification.exception.UserScoreNotFoundException;
 import org.example.learnlink.modules.gamification.repository.BadgeRepository;
 import org.example.learnlink.modules.gamification.repository.UserBadgeRepository;
 import org.example.learnlink.modules.gamification.repository.UserScoreRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,7 @@ public class UserBadgeServiceImp implements UserBadgeService {
     private final UserBadgeRepository userBadgeRepository;
     private final BadgeRepository badgeRepository;
     private final UserScoreRepository userScoreRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public void awardBadgeToUser(Long userId, Long badgeId) {
@@ -49,6 +52,10 @@ public class UserBadgeServiceImp implements UserBadgeService {
                 .build();
 
         userBadgeRepository.save(userBadge);
+        
+        // Publish event for admin stats tracking
+        eventPublisher.publishEvent(new BadgeEarnedEvent(this, userId, badgeId, badge.getCode()));
+        
         log.info("Badge {} awarded successfully to user {}", badgeId, userId);
     }
 
