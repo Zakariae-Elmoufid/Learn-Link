@@ -58,6 +58,20 @@ public class Post {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    // Soft delete fields for moderation
+    @Column(name = "hidden", nullable = false)
+    @Builder.Default
+    private Boolean hidden = false;
+
+    @Column(name = "hidden_at")
+    private LocalDateTime hiddenAt;
+
+    @Column(name = "hidden_by")
+    private Long hiddenBy;
+
+    @Column(name = "hidden_reason")
+    private String hiddenReason;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

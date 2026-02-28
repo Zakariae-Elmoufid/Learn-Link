@@ -80,5 +80,17 @@ public interface PostRepository extends JpaRepository<Post, Long> {
      * Count posts created after a specific date
      */
     long countByCreatedAtAfter(java.time.LocalDateTime since);
+
+    // Moderation queries
+    
+    /**
+     * Find all hidden posts
+     */
+    Page<Post> findByHiddenTrue(Pageable pageable);
+
+    /**
+     * Find all visible (not hidden) posts
+     */
+    Page<Post> findByHiddenFalse(Pageable pageable);
 }
 

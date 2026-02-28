@@ -27,8 +27,8 @@ public class PostResponse {
     private Long viewCount;
     private Long likesCount;
     private Long commentsCount;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+//    private LocalDateTime createdAt;
+//    private LocalDateTime updatedAt;
     private Boolean likedByCurrentUser;
 }
 
