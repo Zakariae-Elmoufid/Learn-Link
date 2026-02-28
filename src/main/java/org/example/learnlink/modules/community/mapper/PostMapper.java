@@ -16,7 +16,8 @@ public interface PostMapper {
     /**
      * Map Post entity to PostResponse DTO
      */
-    @Mapping(target = "likedByCurrentUser", ignore = true)
+    @Mapping(source = "createdAt", target = "createdAt")
+    @Mapping(source = "updatedAt", target = "updatedAt")
     PostResponse postToResponse(Post post);
 
     /**

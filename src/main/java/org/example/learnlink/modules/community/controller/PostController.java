@@ -50,14 +50,14 @@ public class PostController {
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponse> getPostById(@PathVariable Long postId) {
         String cacheKey = "post:" + postId;
-        PostResponse cachedPost = (PostResponse) redisService.get(cacheKey);
+//        PostResponse cachedPost = (PostResponse) redisService.get(cacheKey);
 
-        if (cachedPost != null) {
-            System.out.println("Cache hit for postId: " );
-            return ResponseEntity.ok(cachedPost);
-        }
+//        if (cachedPost != null) {
+//            System.out.println("Cache hit for postId: " );
+//            return ResponseEntity.ok(cachedPost);
+//        }
         PostResponse response = postService.getPostById(postId);
-        redisService.save(cacheKey, response, 3600);
+//        redisService.save(cacheKey, response, 3600);
         return ResponseEntity.ok(response);
     }
 
