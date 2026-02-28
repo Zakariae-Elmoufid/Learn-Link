@@ -60,8 +60,9 @@ public class PostServiceImpl implements IPostService {
 
         // Increment view count
         post.incrementViewCount();
-        postRepository.save(post);
 
+        postRepository.save(post);
+        System.out.println("Post view count incremented for postId: " + postId + ", createdAT : " + post.getCreatedAt());
         return postMapper.postToResponse(post);
     }
 

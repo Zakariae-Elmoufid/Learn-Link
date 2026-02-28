@@ -1,5 +1,6 @@
 package org.example.learnlink.modules.community.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.example.learnlink.modules.community.entity.PostCategory;
 import org.example.learnlink.modules.community.entity.PostType;
 import lombok.AllArgsConstructor;
@@ -27,8 +28,13 @@ public class PostResponse {
     private Long viewCount;
     private Long likesCount;
     private Long commentsCount;
-//    private LocalDateTime createdAt;
-//    private LocalDateTime updatedAt;
+    
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime createdAt;
+    
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime updatedAt;
+    
     private Boolean likedByCurrentUser;
 }
 
