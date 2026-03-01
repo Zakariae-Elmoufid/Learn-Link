@@ -29,4 +29,27 @@ public class ProfileController {
         UserProfileResponse response = profileService.create(userId, request, image);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    /**
+     * Get current authenticated user's profile
+     * GET /api/profile/me
+     */
+    @GetMapping("/me")
+    public ResponseEntity<UserProfileResponse> getMyProfile(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
+        UserProfileResponse response = profileService.getMyProfile(userId);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Get profile by user ID
+     * GET /api/profile/{userId}
+     */
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserProfileResponse> getProfileByUserId(
+            @PathVariable Long userId) {
+        UserProfileResponse response = profileService.getProfileByUserId(userId);
+        return ResponseEntity.ok(response);
+    }
 }

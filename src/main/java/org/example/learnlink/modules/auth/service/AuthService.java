@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -49,6 +50,7 @@ public class AuthService {
                 .verificationCode(UUID.randomUUID().toString())
                 .role(UserRole.STUDENT)
                 .active(true)
+                .createdAt(LocalDateTime.now())
                 .emailVerified(false)
                 .build();
 
@@ -69,6 +71,21 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
+        // First, find the user to check their status before authentication
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new AuthenticationException("User not found"));
+
+        // Check if email is verified
+        if (!Boolean.TRUE.equals(user.getEmailVerified())) {
+            throw new AuthenticationException("Email not verified. Please check your inbox and verify your email before logging in.");
+        }
+
+        // Check if account is active
+        if (!Boolean.TRUE.equals(user.getActive())) {
+            throw new AuthenticationException("Account is deactivated. Please contact support for assistance.");
+        }
+
+        // Now authenticate credentials
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -79,9 +96,6 @@ public class AuthService {
         } catch (BadCredentialsException e) {
             throw new AuthenticationException("Invalid email or password");
         }
-
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new AuthenticationException("User not found"));
 
         CustomUserDetails userDetails = new CustomUserDetails(user);
         String accessToken = jwtService.generateToken(userDetails);

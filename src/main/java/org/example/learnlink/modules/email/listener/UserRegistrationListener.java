@@ -1,6 +1,7 @@
 package org.example.learnlink.modules.email.listener;
 
 
+import jakarta.mail.MessagingException;
 import org.example.learnlink.modules.auth.event.OnUserRegisteredEvent;
 import org.example.learnlink.modules.email.service.EmailService;
 import org.springframework.context.event.EventListener;
@@ -22,7 +23,7 @@ public class UserRegistrationListener {
 
     @Async
     @EventListener
-    public void handleUserRegistered(OnUserRegisteredEvent event) {
-        emailService.sendVerificationEmail(event.getUser());
+    public void handleUserRegistered(OnUserRegisteredEvent event)throws MessagingException {
+        emailService.sendVerificationEmail(event.getUser()) ;
     }
 }

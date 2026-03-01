@@ -71,4 +71,24 @@ public class ProfileService {
         return mapper.toUserProfileResponse(savedUserProfile);
 
     }
+
+    /**
+     * Get profile by user ID
+     * @param userId the user ID to look up
+     * @return UserProfileResponse
+     */
+    public UserProfileResponse getProfileByUserId(Long userId) {
+        UserProfile profile = userProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Profile not found for user: " + userId));
+        return mapper.toUserProfileResponse(profile);
+    }
+
+    /**
+     * Get current user's profile
+     * @param userId the authenticated user's ID
+     * @return UserProfileResponse
+     */
+    public UserProfileResponse getMyProfile(Long userId) {
+        return getProfileByUserId(userId);
+    }
 }
