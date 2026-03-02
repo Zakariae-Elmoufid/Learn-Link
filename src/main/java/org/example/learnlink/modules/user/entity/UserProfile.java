@@ -30,7 +30,7 @@ public class UserProfile {
     private String bio;
 
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "user_profile_subject",
             joinColumns = @JoinColumn(name = "profile_id"),
@@ -40,6 +40,7 @@ public class UserProfile {
     private List<StudentSubject> subjects = new ArrayList<>();
     private String firstName;
     private String lastName;
+
     private String profilePictureUrl;
     @Enumerated(EnumType.STRING)
     private AcademicLevel academicLevel;

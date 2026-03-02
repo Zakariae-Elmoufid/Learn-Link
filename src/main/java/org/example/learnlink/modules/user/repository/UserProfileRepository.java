@@ -65,4 +65,7 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, Long> 
      */
     @Query("SELECT up FROM UserProfile up WHERE up.userId IN :userIds")
     List<UserProfile> findByUserIds(@Param("userIds") List<Long> userIds);
+
+
 }
+

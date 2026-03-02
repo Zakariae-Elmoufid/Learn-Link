@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.example.learnlink.modules.auth.security.CustomUserDetails;
 import org.example.learnlink.modules.user.dto.UserProfileCreate;
 import org.example.learnlink.modules.user.dto.UserProfileResponse;
+import org.example.learnlink.modules.user.dto.UserProfileUpdate;
 import org.example.learnlink.modules.user.service.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -50,6 +51,20 @@ public class ProfileController {
     public ResponseEntity<UserProfileResponse> getProfileByUserId(
             @PathVariable Long userId) {
         UserProfileResponse response = profileService.getProfileByUserId(userId);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Update current user's profile
+     * PUT /api/profile
+     */
+    @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UserProfileResponse> updateProfile(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @ModelAttribute UserProfileUpdate request,
+            @RequestParam(required = false) MultipartFile image) {
+        Long userId = userDetails.getId();
+        UserProfileResponse response = profileService.updateProfile(userId, request, image);
         return ResponseEntity.ok(response);
     }
 }
