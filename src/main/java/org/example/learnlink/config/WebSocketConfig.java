@@ -46,8 +46,9 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
  * const socket = new SockJS('/ws');
  * const stompClient = Stomp.over(socket);
  * 
- * // Connect with user ID header
- * stompClient.connect({'X-User-Id': '123'}, (frame) => {
+ * // Connect with JWT token in Authorization header
+ * const token = 'your-jwt-token-here';
+ * stompClient.connect({'Authorization': 'Bearer ' + token}, (frame) => {
  *     // Subscribe to personal messages
  *     stompClient.subscribe('/user/queue/messages', (message) => {
  *         console.log('New message:', JSON.parse(message.body));

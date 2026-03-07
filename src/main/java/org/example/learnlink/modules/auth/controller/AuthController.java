@@ -32,10 +32,15 @@ public class AuthController {
     }
 
     @GetMapping("/verify")
-    public String verify(@RequestParam String code) {
+    public ResponseEntity<?> verify(@RequestParam String code) {
         boolean verified = authService.verify(code);
-        return verified ? "Account activated!" : "Invalid code!";
-    }
+        if (!verified) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Invalid or expired verification code");
+        }
+
+        return ResponseEntity.ok("Account activated successfully");    }
 
 
     @Operation(summary = "Login user", description = "Authenticates user and returns JWT tokens")

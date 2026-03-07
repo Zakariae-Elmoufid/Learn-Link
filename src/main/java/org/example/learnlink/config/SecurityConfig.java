@@ -42,6 +42,10 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
+                        .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/chat/**").permitAll()
+
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
