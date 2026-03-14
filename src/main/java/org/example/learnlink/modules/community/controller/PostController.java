@@ -8,7 +8,6 @@ import org.example.learnlink.modules.community.mapper.PostMapper;
 import org.example.learnlink.modules.community.service.IPostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.mapstruct.Mapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -48,16 +47,19 @@ public class PostController {
      * GET /api/community/posts/{postId}
      */
     @GetMapping("/{postId}")
-    public ResponseEntity<PostResponse> getPostById(@PathVariable Long postId) {
-        String cacheKey = "post:" + postId;
-//        PostResponse cachedPost = (PostResponse) redisService.get(cacheKey);
+    public ResponseEntity<PostResponse> getPostById(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long currentUserId = userDetails != null ? userDetails.getId() : null;
+        String cacheKey = "post:" + postId + ":viewer:" + (currentUserId != null ? currentUserId : "anon");
+        PostResponse cachedPost = (PostResponse) redisService.get(cacheKey);
 
-//        if (cachedPost != null) {
-//            System.out.println("Cache hit for postId: " );
-//            return ResponseEntity.ok(cachedPost);
-//        }
-        PostResponse response = postService.getPostById(postId);
-//        redisService.save(cacheKey, response, 3600);
+        if (cachedPost != null) {
+            System.out.println("Cache hit for postId: " );
+            return ResponseEntity.ok(cachedPost);
+        }
+        PostResponse response = postService.getPostById(postId, currentUserId);
+        redisService.save(cacheKey, response, 3600);
         return ResponseEntity.ok(response);
     }
 
@@ -67,10 +69,12 @@ public class PostController {
      */
     @GetMapping
     public ResponseEntity<PageResponse<PostResponse>> getAllPosts(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
+        Long currentUserId = userDetails != null ? userDetails.getId() : null;
 
-        String cacheKey = "posts:page:" + page + ":size:" + size;
+        String cacheKey = "posts:page:" + page + ":size:" + size + ":viewer:" + (currentUserId != null ? currentUserId : "anon");
         PageResponse<PostResponse> cachedPosts = (PageResponse<PostResponse>) redisService.get(cacheKey);
 
         if (cachedPosts != null) {
@@ -79,7 +83,7 @@ public class PostController {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<PostResponse> posts = postService.getAllPosts(pageable);
+        Page<PostResponse> posts = postService.getAllPosts(pageable, currentUserId);
 
         PageResponse<PostResponse> response =
                 mapper.toPageResponse(posts);
@@ -97,10 +101,12 @@ public class PostController {
     @GetMapping("/category/{category}")
     public ResponseEntity<Page<PostResponse>> getPostsByCategory(
             @PathVariable PostCategory category,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
+        Long currentUserId = userDetails != null ? userDetails.getId() : null;
         Pageable pageable = PageRequest.of(page, size);
-        Page<PostResponse> posts = postService.getPostsByCategory(category, pageable);
+        Page<PostResponse> posts = postService.getPostsByCategory(category, pageable, currentUserId);
         return ResponseEntity.ok(posts);
     }
 
@@ -110,10 +116,12 @@ public class PostController {
      */
     @GetMapping("/popular")
     public ResponseEntity<Page<PostResponse>> getPopularPosts(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
+        Long currentUserId = userDetails != null ? userDetails.getId() : null;
         Pageable pageable = PageRequest.of(page, size);
-        Page<PostResponse> posts = postService.getPopularPosts(pageable);
+        Page<PostResponse> posts = postService.getPopularPosts(pageable, currentUserId);
         return ResponseEntity.ok(posts);
     }
 
@@ -123,10 +131,12 @@ public class PostController {
      */
     @GetMapping("/trending")
     public ResponseEntity<Page<PostResponse>> getTrendingPosts(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
+        Long currentUserId = userDetails != null ? userDetails.getId() : null;
         Pageable pageable = PageRequest.of(page, size);
-        Page<PostResponse> posts = postService.getTrendingPosts(pageable);
+        Page<PostResponse> posts = postService.getTrendingPosts(pageable, currentUserId);
         return ResponseEntity.ok(posts);
     }
 
@@ -137,10 +147,12 @@ public class PostController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<Page<PostResponse>> getUserPosts(
             @PathVariable Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
+        Long currentUserId = userDetails != null ? userDetails.getId() : null;
         Pageable pageable = PageRequest.of(page, size);
-        Page<PostResponse> posts = postService.getUserPosts(userId, pageable);
+        Page<PostResponse> posts = postService.getUserPosts(userId, pageable, currentUserId);
         return ResponseEntity.ok(posts);
     }
 
@@ -153,14 +165,16 @@ public class PostController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) PostCategory category,
             @RequestParam(required = false) String type,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
+        Long currentUserId = userDetails != null ? userDetails.getId() : null;
         SearchPostRequest request = SearchPostRequest.builder()
             .keyword(keyword)
             .category(category)
             .build();
         Pageable pageable = PageRequest.of(page, size);
-        Page<PostResponse> posts = postService.searchPosts(request, pageable);
+        Page<PostResponse> posts = postService.searchPosts(request, pageable, currentUserId);
         return ResponseEntity.ok(posts);
     }
 
@@ -174,6 +188,7 @@ public class PostController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody UpdatePostRequest request) {
         Long userId = userDetails.getId();
+        redisService.delete("posts:*");
         PostResponse response = postService.updatePost(postId, userId, request);
         return ResponseEntity.ok(response);
     }
@@ -188,6 +203,7 @@ public class PostController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getId();
         postService.deletePost(postId, userId);
+        redisService.delete("posts:*");
         return ResponseEntity.noContent().build();
     }
 
@@ -201,6 +217,7 @@ public class PostController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getId();
         postService.likePost(postId, userId);
+        redisService.delete("posts:*");
         return ResponseEntity.ok().build();
     }
 
@@ -214,6 +231,7 @@ public class PostController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getId();
         postService.unlikePost(postId, userId);
+        redisService.delete("posts:*");
         return ResponseEntity.ok().build();
     }
 }

@@ -18,10 +18,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
-@RestController
-@RequestMapping("/api/groups/{groupId}/messages/attachments")
+/**
+ * DEPRECATED: This controller is no longer active.
+ * Group messaging feature has been removed from the project.
+ */
+//@RestController
+//@RequestMapping("/api/groups/{groupId}/messages/attachments")
 @RequiredArgsConstructor
-@Tag(name = "Group Chat Attachments")
+//@Tag(name = "Group Chat Attachments")
 public class GroupChatAttachmentController {
 
     private final S3StorageService s3StorageService;

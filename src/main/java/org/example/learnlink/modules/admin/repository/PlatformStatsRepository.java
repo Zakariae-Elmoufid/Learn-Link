@@ -28,9 +28,9 @@ public interface PlatformStatsRepository extends JpaRepository<PlatformStats, Lo
     @Modifying
         @Query(value = "INSERT INTO platform_stats (id, total_users, active_users_last_7_days, active_users_last_30_days, " +
                 "new_users_this_week, new_users_this_month, total_posts, total_questions, total_answers, total_comments, " +
-                "posts_this_week, total_tasks, completed_tasks, total_connections, total_study_groups, active_study_groups, " +
+                "posts_this_week, total_tasks, completed_tasks, total_connections, " +
                 "total_points_awarded, total_badges_earned, last_updated) " +
-                "SELECT 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP " +
+                "SELECT 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP " +
                 "WHERE NOT EXISTS (SELECT 1 FROM platform_stats WHERE id = 1)", nativeQuery = true)
     void initializeIfNotExists();
 
@@ -70,11 +70,6 @@ public interface PlatformStatsRepository extends JpaRepository<PlatformStats, Lo
     @Modifying
     @Query("UPDATE PlatformStats p SET p.totalConnections = p.totalConnections + 1 WHERE p.id = 1")
     void incrementTotalConnections();
-
-    @Modifying
-    @Query("UPDATE PlatformStats p SET p.totalStudyGroups = p.totalStudyGroups + 1, " +
-           "p.activeStudyGroups = p.activeStudyGroups + 1 WHERE p.id = 1")
-    void incrementTotalStudyGroups();
 
     @Modifying
     @Query("UPDATE PlatformStats p SET p.totalPointsAwarded = p.totalPointsAwarded + :points WHERE p.id = 1")

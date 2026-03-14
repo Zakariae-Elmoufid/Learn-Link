@@ -43,7 +43,7 @@ public class QuestionServiceImpl implements IQuestionService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public QuestionResponse getQuestionById(Long questionId) {
         Question question = questionRepository.findById(questionId)
             .orElseThrow(() -> new RuntimeException("Question not found with id: " + questionId));

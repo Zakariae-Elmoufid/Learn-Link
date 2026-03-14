@@ -27,8 +27,11 @@ import java.util.stream.Collectors;
 /**
  * Implementation of IGroupMessageService.
  * Handles all group messaging business logic.
+ * 
+ * DEPRECATED: This service is no longer active.
+ * Group messaging feature has been removed from the project.
  */
-@Service
+//@Service
 @RequiredArgsConstructor
 @Slf4j
 public class GroupMessageServiceImpl implements IGroupMessageService {

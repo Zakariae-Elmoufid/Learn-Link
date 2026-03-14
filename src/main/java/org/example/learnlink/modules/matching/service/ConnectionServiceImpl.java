@@ -17,8 +17,10 @@ import org.example.learnlink.modules.matching.event.ConnectionRequestSentEvent;
 import org.example.learnlink.modules.matching.mapper.ConnectionMapper;
 import org.example.learnlink.modules.matching.repository.ConnectionRepository;
 import org.example.learnlink.modules.matching.repository.ConnectionRequestRepository;
+import org.example.learnlink.modules.user.dto.UserProfileResponse;
 import org.example.learnlink.modules.user.entity.UserProfile;
 import org.example.learnlink.modules.user.repository.UserProfileRepository;
+import org.example.learnlink.modules.user.service.ProfileService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +44,7 @@ public class ConnectionServiceImpl implements IConnectionService {
     private final UserProfileRepository userProfileRepository;
     private final ConnectionMapper connectionMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final ProfileService profileService;
 
     // ==================== Connection Requests ====================
 
@@ -55,9 +58,7 @@ public class ConnectionServiceImpl implements IConnectionService {
         }
 
         // Check if receiver exists
-        UserProfile receiverProfile = userProfileRepository.findByUserId(dto.getReceiverId())
-                .orElseThrow(() -> new ResourceNotFoundException("UserProfile", "userId", dto.getReceiverId()));
-
+        UserProfileResponse receiverProfile = profileService.getProfileByUserId(dto.getReceiverId());
         // Check if already connected
         if (connectionRepository.existsActiveConnectionBetween(senderId, dto.getReceiverId())) {
             throw new IllegalStateException("Users are already connected");
@@ -94,7 +95,7 @@ public class ConnectionServiceImpl implements IConnectionService {
         ));
 
         // Get sender profile for response
-        UserProfile senderProfile = userProfileRepository.findByUserId(senderId).orElse(null);
+        UserProfileResponse senderProfile = profileService.getProfileByUserId(senderId);
 
         return connectionMapper.toRequestResponseWithProfiles(savedRequest, senderProfile, receiverProfile);
     }
@@ -143,7 +144,7 @@ public class ConnectionServiceImpl implements IConnectionService {
         ));
 
         // Get the sender's profile for the response (connected user from receiver's perspective)
-        UserProfile connectedUserProfile = userProfileRepository.findByUserId(request.getSenderId()).orElse(null);
+        UserProfileResponse connectedUserProfile = profileService.getProfileByUserId(request.getSenderId());
 
         return connectionMapper.toConnectionResponseWithProfile(
                 savedConnection,
@@ -202,8 +203,7 @@ public class ConnectionServiceImpl implements IConnectionService {
         }
 
         // Update request status
-        request.setStatus(RequestStatus.CANCELLED);
-        requestRepository.save(request);
+        requestRepository.delete(request);
 
         log.info("Connection request {} cancelled", requestId);
     }
@@ -217,7 +217,7 @@ public class ConnectionServiceImpl implements IConnectionService {
 
         return requests.stream()
                 .map(request -> {
-                    UserProfile senderProfile = userProfileRepository.findByUserId(request.getSenderId()).orElse(null);
+                    UserProfileResponse senderProfile = profileService.getProfileByUserId(request.getSenderId());
                     return connectionMapper.toRequestResponseWithSender(request, senderProfile);
                 })
                 .collect(Collectors.toList());
@@ -232,12 +232,12 @@ public class ConnectionServiceImpl implements IConnectionService {
 
         return requests.stream()
                 .map(request -> {
-                    UserProfile receiverProfile = userProfileRepository.findByUserId(request.getReceiverId()).orElse(null);
+                    UserProfileResponse receiverProfile = profileService.getProfileByUserId(request.getReceiverId());
                     ConnectionRequestResponse response = connectionMapper.toRequestResponse(request);
                     if (receiverProfile != null) {
-                        response.setReceiverFirstName(receiverProfile.getFirstName());
-                        response.setReceiverLastName(receiverProfile.getLastName());
-                        response.setReceiverProfilePictureUrl(receiverProfile.getProfilePictureUrl());
+                        response.setReceiverFirstName(receiverProfile.firstName());
+                        response.setReceiverLastName(receiverProfile.lastName());
+                        response.setReceiverProfilePictureUrl(receiverProfile.profilePictureUrl());
                     }
                     return response;
                 })
@@ -262,7 +262,7 @@ public class ConnectionServiceImpl implements IConnectionService {
         return connections.stream()
                 .map(connection -> {
                     Long connectedUserId = connection.getOtherUserId(userId);
-                    UserProfile connectedUserProfile = userProfileRepository.findByUserId(connectedUserId).orElse(null);
+                    UserProfileResponse connectedUserProfile = profileService.getProfileByUserId(connectedUserId);
                     return connectionMapper.toConnectionResponseWithProfile(connection, connectedUserId, connectedUserProfile);
                 })
                 .collect(Collectors.toList());
@@ -282,7 +282,7 @@ public class ConnectionServiceImpl implements IConnectionService {
         }
 
         Long connectedUserId = connection.getOtherUserId(userId);
-        UserProfile connectedUserProfile = userProfileRepository.findByUserId(connectedUserId).orElse(null);
+        UserProfileResponse connectedUserProfile = profileService.getProfileByUserId(connectedUserId);
 
         return connectionMapper.toConnectionResponseWithProfile(connection, connectedUserId, connectedUserProfile);
     }

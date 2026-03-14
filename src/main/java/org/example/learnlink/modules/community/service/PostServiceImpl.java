@@ -49,12 +49,12 @@ public class PostServiceImpl implements IPostService {
         // Publish event for gamification
         eventPublisher.publishEvent(new PostCreatedEvent(this, userId, post.getId(), request.getType()));
 
-        return postMapper.postToResponse(post);
+        return mapToResponseWithLikeStatus(post, userId);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public PostResponse getPostById(Long postId) {
+    public PostResponse getPostById(Long postId, Long currentUserId) {
         Post post = postRepository.findById(postId)
             .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
 
@@ -63,50 +63,50 @@ public class PostServiceImpl implements IPostService {
 
         postRepository.save(post);
         System.out.println("Post view count incremented for postId: " + postId + ", createdAT : " + post.getCreatedAt());
-        return postMapper.postToResponse(post);
+        return mapToResponseWithLikeStatus(post, currentUserId);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PostResponse> getUserPosts(Long userId, Pageable pageable) {
+    public Page<PostResponse> getUserPosts(Long userId, Pageable pageable, Long currentUserId) {
         return postRepository.findByUserId(userId, pageable)
-            .map(postMapper::postToResponse);
+            .map(post -> mapToResponseWithLikeStatus(post, currentUserId));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PostResponse> getPostsByCategory(PostCategory category, Pageable pageable) {
+    public Page<PostResponse> getPostsByCategory(PostCategory category, Pageable pageable, Long currentUserId) {
         return postRepository.findByCategory(category, pageable)
-            .map(postMapper::postToResponse);
+            .map(post -> mapToResponseWithLikeStatus(post, currentUserId));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PostResponse> getPopularPosts(Pageable pageable) {
+    public Page<PostResponse> getPopularPosts(Pageable pageable, Long currentUserId) {
         return postRepository.findPopularPosts(pageable)
-            .map(postMapper::postToResponse);
+            .map(post -> mapToResponseWithLikeStatus(post, currentUserId));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PostResponse> getTrendingPosts(Pageable pageable) {
+    public Page<PostResponse> getTrendingPosts(Pageable pageable, Long currentUserId) {
         LocalDateTime since = LocalDateTime.now().minusHours(24);
         return postRepository.findTrendingPosts(since, pageable)
-            .map(postMapper::postToResponse);
+            .map(post -> mapToResponseWithLikeStatus(post, currentUserId));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PostResponse> searchPosts(SearchPostRequest request, Pageable pageable) {
+    public Page<PostResponse> searchPosts(SearchPostRequest request, Pageable pageable, Long currentUserId) {
         if (request.getKeyword() != null || request.getCategory() != null || request.getType() != null) {
             return postRepository.searchWithFilters(
                 request.getKeyword(),
                 request.getCategory(),
                 request.getType(),
                 pageable
-            ).map(postMapper::postToResponse);
+            ).map(post -> mapToResponseWithLikeStatus(post, currentUserId));
         }
-        return getAllPosts(pageable);
+        return getAllPosts(pageable, currentUserId);
     }
 
     @Override
@@ -124,7 +124,7 @@ public class PostServiceImpl implements IPostService {
         post.setCategory(request.getCategory());
 
         post = postRepository.save(post);
-        return postMapper.postToResponse(post);
+        return mapToResponseWithLikeStatus(post, userId);
     }
 
     @Override
@@ -173,9 +173,17 @@ public class PostServiceImpl implements IPostService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PostResponse> getAllPosts(Pageable pageable) {
+    public Page<PostResponse> getAllPosts(Pageable pageable, Long currentUserId) {
         return postRepository.findAll(pageable)
-            .map(postMapper::postToResponse);
+            .map(post -> mapToResponseWithLikeStatus(post, currentUserId));
+    }
+
+    private PostResponse mapToResponseWithLikeStatus(Post post, Long currentUserId) {
+        PostResponse response = postMapper.postToResponse(post);
+        boolean likedByCurrentUser = currentUserId != null
+            && postLikeRepository.existsByPostIdAndUserId(post.getId(), currentUserId);
+        response.setLikedByCurrentUser(likedByCurrentUser);
+        return response;
     }
 }
 

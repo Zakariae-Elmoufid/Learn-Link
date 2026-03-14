@@ -83,14 +83,6 @@ public class PlatformStats {
     @Builder.Default
     private Long totalConnections = 0L;
 
-    @Column(name = "total_study_groups", nullable = false)
-    @Builder.Default
-    private Long totalStudyGroups = 0L;
-
-    @Column(name = "active_study_groups", nullable = false)
-    @Builder.Default
-    private Long activeStudyGroups = 0L;
-
     // ==================== Gamification Statistics ====================
     
     @Column(name = "total_points_awarded", nullable = false)
@@ -153,11 +145,6 @@ public class PlatformStats {
 
     public void incrementTotalConnections() {
         this.totalConnections++;
-    }
-
-    public void incrementTotalStudyGroups() {
-        this.totalStudyGroups++;
-        this.activeStudyGroups++;
     }
 
     public void addPoints(long points) {

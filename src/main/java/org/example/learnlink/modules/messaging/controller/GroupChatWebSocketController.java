@@ -14,7 +14,11 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 
 
-@Controller
+/**
+ * DEPRECATED: This controller is no longer active.
+ * Group messaging feature has been removed from the project.
+ */
+//@Controller
 @RequiredArgsConstructor
 @Slf4j
 public class GroupChatWebSocketController {

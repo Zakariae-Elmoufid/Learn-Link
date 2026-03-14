@@ -19,14 +19,26 @@ public class LeaderboardRepository {
     public List<LeaderboardEntryResponse> getGlobalLeaderboard(Pageable pageable) {
         String sql = """
             SELECT 
-                us.user_id,
-                us.level,
-                us.total_points,
-                COUNT(DISTINCT ub.badge_id) as badge_count
-            FROM user_scores us
-            LEFT JOIN user_badges ub ON us.user_id = ub.user_id
-            GROUP BY us.user_id, us.level, us.total_points
-            ORDER BY us.total_points DESC, us.level DESC
+                ranked.rank,
+                ranked.user_id,
+                ranked.username,
+                ranked.level,
+                ranked.total_points,
+                ranked.badge_count
+            FROM (
+                SELECT 
+                    ROW_NUMBER() OVER (ORDER BY us.total_points DESC, us.level DESC) as rank,
+                    us.user_id,
+                    u.username,
+                    us.level,
+                    us.total_points,
+                    COUNT(DISTINCT ub.badge_id) as badge_count
+                FROM user_scores us
+                LEFT JOIN users u ON us.user_id = u.id  
+                LEFT JOIN user_badges ub ON us.user_id = ub.user_id
+                GROUP BY us.user_id, u.username, us.level, us.total_points
+            ) ranked
+            ORDER BY ranked.rank ASC
             """;
 
         Query query = entityManager.createNativeQuery(sql);
@@ -37,30 +49,40 @@ public class LeaderboardRepository {
 
         return results.stream()
             .map(row -> LeaderboardEntryResponse.builder()
-                .userId((Long) row[0])
-                .level((Integer) row[1])
-                .totalPoints((Integer) row[2])
-                .badgeCount(((Number) row[3]).longValue())
+                .rank(((Number) row[0]).intValue())
+                .userId((Long) row[1])
+                .username((String) row[2])
+                .level((Integer) row[3])
+                .totalPoints((Integer) row[4])
+                .badgeCount(((Number) row[5]).longValue())
                 .build())
-            .limit(pageable.getPageSize())
-            .collect(java.util.stream.Collectors.toList())
-            .stream()
-            .map(entry -> entry)
             .collect(java.util.stream.Collectors.toList());
     }
 
     public List<LeaderboardEntryResponse> getWeeklyLeaderboard(int limit) {
         String sql = """
             SELECT 
-                us.user_id,
-                us.level,
-                us.total_points,
-                COUNT(DISTINCT ub.badge_id) as badge_count
-            FROM user_scores us
-            LEFT JOIN user_badges ub ON us.user_id = ub.user_id
-            WHERE us.updated_at >= CURRENT_DATE - INTERVAL 7 DAY
-            GROUP BY us.user_id, us.level, us.total_points
-            ORDER BY us.total_points DESC
+                ranked.rank,
+                ranked.user_id,
+                ranked.username,
+                ranked.level,
+                ranked.total_points,
+                ranked.badge_count
+            FROM (
+                SELECT 
+                    ROW_NUMBER() OVER (ORDER BY us.total_points DESC, us.level DESC) as rank,
+                    us.user_id,
+                    u.username,
+                    us.level,
+                    us.total_points,
+                    COUNT(DISTINCT ub.badge_id) as badge_count
+                FROM user_scores us
+                LEFT JOIN users u ON us.user_id = u.id
+                LEFT JOIN user_badges ub ON us.user_id = ub.user_id
+                WHERE us.updated_at >= CURRENT_DATE - INTERVAL 7 DAY
+                GROUP BY us.user_id, u.username, us.level, us.total_points
+            ) ranked
+            ORDER BY ranked.rank ASC
             LIMIT :limit
             """;
 
@@ -71,10 +93,12 @@ public class LeaderboardRepository {
 
         return results.stream()
             .map(row -> LeaderboardEntryResponse.builder()
-                .userId((Long) row[0])
-                .level((Integer) row[1])
-                .totalPoints((Integer) row[2])
-                .badgeCount(((Number) row[3]).longValue())
+                .rank(((Number) row[0]).intValue())
+                .userId((Long) row[1])
+                .username((String) row[2])
+                .level((Integer) row[3])
+                .totalPoints((Integer) row[4])
+                .badgeCount(((Number) row[5]).longValue())
                 .build())
             .toList();
     }

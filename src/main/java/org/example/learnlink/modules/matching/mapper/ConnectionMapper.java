@@ -4,6 +4,7 @@ import org.example.learnlink.modules.matching.dto.response.ConnectionRequestResp
 import org.example.learnlink.modules.matching.dto.response.ConnectionResponse;
 import org.example.learnlink.modules.matching.entity.Connection;
 import org.example.learnlink.modules.matching.entity.ConnectionRequest;
+import org.example.learnlink.modules.user.dto.UserProfileResponse;
 import org.example.learnlink.modules.user.entity.UserProfile;
 import org.mapstruct.*;
 
@@ -42,12 +43,12 @@ public interface ConnectionMapper {
      * @return the response DTO with sender info populated
      */
     default ConnectionRequestResponse toRequestResponseWithSender(ConnectionRequest request,
-                                                                   UserProfile senderProfile) {
+                                                                  UserProfileResponse senderProfile) {
         ConnectionRequestResponse response = toRequestResponse(request);
         if (senderProfile != null) {
-            response.setSenderFirstName(senderProfile.getFirstName());
-            response.setSenderLastName(senderProfile.getLastName());
-            response.setSenderProfilePictureUrl(senderProfile.getProfilePictureUrl());
+            response.setSenderFirstName(senderProfile.firstName());
+            response.setSenderLastName(senderProfile.lastName());
+            response.setSenderProfilePictureUrl(senderProfile.profilePictureUrl());
         }
         return response;
     }
@@ -61,13 +62,13 @@ public interface ConnectionMapper {
      * @return the response DTO with all info populated
      */
     default ConnectionRequestResponse toRequestResponseWithProfiles(ConnectionRequest request,
-                                                                     UserProfile senderProfile,
-                                                                     UserProfile receiverProfile) {
+                                                                    UserProfileResponse senderProfile,
+                                                                    UserProfileResponse receiverProfile) {
         ConnectionRequestResponse response = toRequestResponseWithSender(request, senderProfile);
         if (receiverProfile != null) {
-            response.setReceiverFirstName(receiverProfile.getFirstName());
-            response.setReceiverLastName(receiverProfile.getLastName());
-            response.setReceiverProfilePictureUrl(receiverProfile.getProfilePictureUrl());
+            response.setReceiverFirstName(receiverProfile.firstName());
+            response.setReceiverLastName(receiverProfile.lastName());
+            response.setReceiverProfilePictureUrl(receiverProfile.profilePictureUrl());
         }
         return response;
     }
@@ -99,16 +100,16 @@ public interface ConnectionMapper {
      */
     default ConnectionResponse toConnectionResponseWithProfile(Connection connection,
                                                                 Long connectedUserId,
-                                                                UserProfile userProfile) {
+                                                               UserProfileResponse userProfile) {
         ConnectionResponse response = toConnectionResponse(connection);
         response.setConnectedUserId(connectedUserId);
         if (userProfile != null) {
-            response.setFirstName(userProfile.getFirstName());
-            response.setLastName(userProfile.getLastName());
-            response.setProfilePictureUrl(userProfile.getProfilePictureUrl());
-            response.setBio(userProfile.getBio());
-            response.setAcademicLevel(userProfile.getAcademicLevel() != null
-                    ? userProfile.getAcademicLevel().name()
+            response.setFirstName(userProfile.firstName());
+            response.setLastName(userProfile.lastName());
+            response.setProfilePictureUrl(userProfile.profilePictureUrl());
+            response.setBio(userProfile.bio());
+            response.setAcademicLevel(userProfile.academicLevel() != null
+                    ? userProfile.academicLevel().name()
                     : null);
         }
         return response;

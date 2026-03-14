@@ -69,8 +69,6 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
                 .taskCompletionRate(Math.round(taskCompletionRate * 100.0) / 100.0)
                 // Engagement Statistics
                 .totalConnections(safeValue(stats.getTotalConnections()))
-                .totalStudyGroups(safeValue(stats.getTotalStudyGroups()))
-                .activeStudySessions(safeValue(stats.getActiveStudyGroups()))
                 // Gamification Statistics
                 .totalPointsAwarded(safeValue(stats.getTotalPointsAwarded()))
                 .badgesEarned(safeValue(stats.getTotalBadgesEarned()))

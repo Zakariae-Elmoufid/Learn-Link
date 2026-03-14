@@ -6,8 +6,6 @@ import org.example.learnlink.modules.gamification.dto.AddPointsRequest;
 import org.example.learnlink.modules.gamification.service.GamificationService;
 import org.example.learnlink.modules.gamification.service.UserBadgeService;
 import org.example.learnlink.modules.matching.event.ConnectionAcceptedEvent;
-import org.example.learnlink.modules.matching.event.MemberJoinedGroupEvent;
-import org.example.learnlink.modules.matching.event.StudyGroupCreatedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -55,52 +53,5 @@ public class MatchingGamificationListener {
         }
     }
 
-    /**
-     * Handle study group created event - award points to creator
-     */
-    @Async
-    @EventListener
-    public void handleStudyGroupCreatedEvent(StudyGroupCreatedEvent event) {
-        log.info("Study group created event received: groupId={}, ownerId={}",
-                event.getGroupId(), event.getOwnerId());
 
-        try {
-            AddPointsRequest request = AddPointsRequest.builder()
-                    .points(20)
-                    .actionType("STUDY_GROUP_CREATED")
-                    .build();
-
-            gamificationService.addPoints(event.getOwnerId(), request);
-            log.info("Points awarded for creating study group: userId={}, points=20",
-                    event.getOwnerId());
-
-            // Award GROUP_LEADER badge (ID 5) for creating a study group
-            userBadgeService.awardBadgeToUser(event.getOwnerId(), 5L);
-        } catch (Exception e) {
-            log.error("Error awarding points for study group creation: {}", e.getMessage());
-        }
-    }
-
-    /**
-     * Handle member joined group event - award points to new member
-     */
-    @Async
-    @EventListener
-    public void handleMemberJoinedGroupEvent(MemberJoinedGroupEvent event) {
-        log.info("Member joined group event received: groupId={}, userId={}",
-                event.getGroupId(), event.getUserId());
-
-        try {
-            AddPointsRequest request = AddPointsRequest.builder()
-                    .points(5)
-                    .actionType("JOINED_STUDY_GROUP")
-                    .build();
-
-            gamificationService.addPoints(event.getUserId(), request);
-            log.info("Points awarded for joining study group: userId={}, points=5",
-                    event.getUserId());
-        } catch (Exception e) {
-            log.error("Error awarding points for joining study group: {}", e.getMessage());
-        }
-    }
 }

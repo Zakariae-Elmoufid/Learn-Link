@@ -21,32 +21,32 @@ public interface IPostService {
     /**
      * Get post by ID
      */
-    PostResponse getPostById(Long postId);
+    PostResponse getPostById(Long postId, Long currentUserId);
 
     /**
      * Get all posts for a user
      */
-    Page<PostResponse> getUserPosts(Long userId, Pageable pageable);
+    Page<PostResponse> getUserPosts(Long userId, Pageable pageable, Long currentUserId);
 
     /**
      * Get posts by category
      */
-    Page<PostResponse> getPostsByCategory(PostCategory category, Pageable pageable);
+    Page<PostResponse> getPostsByCategory(PostCategory category, Pageable pageable, Long currentUserId);
 
     /**
      * Get popular posts
      */
-    Page<PostResponse> getPopularPosts(Pageable pageable);
+    Page<PostResponse> getPopularPosts(Pageable pageable, Long currentUserId);
 
     /**
      * Get trending posts
      */
-    Page<PostResponse> getTrendingPosts(Pageable pageable);
+    Page<PostResponse> getTrendingPosts(Pageable pageable, Long currentUserId);
 
     /**
      * Search posts
      */
-    Page<PostResponse> searchPosts(SearchPostRequest request, Pageable pageable);
+    Page<PostResponse> searchPosts(SearchPostRequest request, Pageable pageable, Long currentUserId);
 
     /**
      * Update a post
@@ -71,6 +71,6 @@ public interface IPostService {
     /**
      * Get all posts
      */
-    Page<PostResponse> getAllPosts(Pageable pageable);
+    Page<PostResponse> getAllPosts(Pageable pageable, Long currentUserId);
 }
 

@@ -150,19 +150,10 @@ public class ProfileService {
     /**
      * Convert UserProfile to UserProfileResponse with presigned URL for profile picture
      */
-    private UserProfileResponse toResponseWithPresignedUrl(UserProfile profile) {
+    private  UserProfileResponse toResponseWithPresignedUrl(UserProfile profile) {
         UserProfileResponse response = mapper.toUserProfileResponse(profile);
         
-        // Generate presigned URL if profile picture exists
-        String presignedUrl = null;
-        if (profile.getProfilePictureUrl() != null && !profile.getProfilePictureUrl().isEmpty()) {
-            try {
-                presignedUrl = s3StorageService.generatePresignedUrl(profile.getProfilePictureUrl());
-            } catch (Exception e) {
-                log.warn("Failed to generate presigned URL for profile picture: {}", e.getMessage());
-                presignedUrl = profile.getProfilePictureUrl(); // fallback to stored URL
-            }
-        }
+       String presignedUrl = toPresignedUrl( profile.getProfilePictureUrl());
         
         // Return new response with presigned URL
         return new UserProfileResponse(
@@ -173,5 +164,19 @@ public class ProfileService {
                 response.studentSubjects(),
                 response.academicLevel()
         );
+    }
+
+    public String toPresignedUrl(String profilePictureUrl) {
+        // Check for null or empty string immediately
+        if (profilePictureUrl == null || profilePictureUrl.isBlank()) {
+            return null;
+        }
+
+        try {
+            return s3StorageService.generatePresignedUrl(profilePictureUrl);
+        } catch (Exception e) {
+            log.warn("Failed to generate presigned URL for profile picture: {}. Falling back to raw path.", e.getMessage());
+            return profilePictureUrl; // Fallback to avoid breaking the UI
+        }
     }
 }

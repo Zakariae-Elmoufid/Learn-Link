@@ -26,9 +26,12 @@ import java.util.Map;
 /**
  * REST Controller for group chat operations.
  * Provides endpoints for sending messages, fetching history, and managing read status.
+ * 
+ * DEPRECATED: This controller is no longer active.
+ * Group messaging feature has been removed from the project.
  */
-@RestController
-@RequestMapping("/api/groups/{groupId}/messages")
+//@RestController
+//@RequestMapping("/api/groups/{groupId}/messages")
 @RequiredArgsConstructor
 @Slf4j
 public class GroupChatController {

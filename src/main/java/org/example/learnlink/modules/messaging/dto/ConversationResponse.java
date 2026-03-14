@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.learnlink.modules.user.dto.UserProfileResponse;
 
 import java.time.LocalDateTime;
 
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 public class ConversationResponse {
 
     private Long participantId;
+    private UserProfileResponse participant;
     private String lastMessage;
     private LocalDateTime lastMessageAt;
     private Long unreadCount;

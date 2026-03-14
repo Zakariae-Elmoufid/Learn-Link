@@ -4,6 +4,7 @@ package org.example.learnlink.common.service;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -21,8 +22,11 @@ public class RedisService {
         return redisTemplate.opsForValue().get(key);
     }
 
-    public void delete(String key) {
-        redisTemplate.delete(key);
+    public void delete(String pattern) {
+        Set<String> keys = redisTemplate.keys(pattern);
+        if (keys != null && !keys.isEmpty()) {
+            redisTemplate.delete(keys);
+        }
     }
 
 

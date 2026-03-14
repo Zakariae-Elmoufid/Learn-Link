@@ -2,6 +2,7 @@ package org.example.learnlink.modules.messaging.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.learnlink.common.exception.ResourceNotFoundException;
 import org.example.learnlink.modules.messaging.dto.ConversationResponse;
 import org.example.learnlink.modules.messaging.dto.MessageResponse;
 import org.example.learnlink.modules.messaging.dto.SendMessageRequest;
@@ -13,12 +14,18 @@ import org.example.learnlink.modules.messaging.exception.MessageNotFoundExceptio
 import org.example.learnlink.modules.messaging.exception.UnauthorizedMessageAccessException;
 import org.example.learnlink.modules.messaging.mapper.MessageMapper;
 import org.example.learnlink.modules.messaging.repository.MessageRepository;
+import org.example.learnlink.modules.user.dto.UserProfileResponse;
+import org.example.learnlink.modules.user.entity.UserProfile;
+import org.example.learnlink.modules.user.mapper.UserProfileMapper;
+import org.example.learnlink.modules.user.repository.UserProfileRepository;
+import org.example.learnlink.modules.user.service.ProfileService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.swing.table.TableRowSorter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +41,7 @@ public class MessageServiceImpl implements IMessageService {
     private final MessageRepository messageRepository;
     private final MessageMapper messageMapper;
     private final ApplicationEventPublisher eventPublisher;
-
+    private final ProfileService profileService;
     @Override
     @Transactional
     public MessageResponse sendMessage(Long senderId, SendMessageRequest request) {
@@ -100,9 +107,12 @@ public class MessageServiceImpl implements IMessageService {
         for (Long partnerId : partnerIds) {
             Message lastMessage = messageRepository.findLastMessageInConversation(userId, partnerId);
             Long unreadCount = messageRepository.countUnreadMessagesFromSender(userId, partnerId);
+            UserProfileResponse partnerProfile = profileService.getProfileByUserId(partnerId);
+
 
             conversations.add(ConversationResponse.builder()
                     .participantId(partnerId)
+                            .participant(partnerProfile)
                     .lastMessage(lastMessage != null ? lastMessage.getContent() : null)
                     .lastMessageAt(lastMessage != null ? lastMessage.getCreatedAt() : null)
                     .unreadCount(unreadCount)

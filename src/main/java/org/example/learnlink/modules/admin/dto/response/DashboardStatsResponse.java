@@ -32,8 +32,6 @@ public class DashboardStatsResponse {
     
     // Engagement Statistics
     private Long totalConnections;
-    private Long totalStudyGroups;
-    private Long activeStudySessions;
     
     // Gamification Statistics
     private Long totalPointsAwarded;

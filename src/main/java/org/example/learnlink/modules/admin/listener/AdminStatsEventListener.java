@@ -8,7 +8,6 @@ import org.example.learnlink.modules.community.event.*;
 import org.example.learnlink.modules.gamification.event.BadgeEarnedEvent;
 import org.example.learnlink.modules.gamification.event.PointsAwardedEvent;
 import org.example.learnlink.modules.matching.event.ConnectionAcceptedEvent;
-import org.example.learnlink.modules.matching.event.StudyGroupCreatedEvent;
 import org.example.learnlink.modules.planner.event.TaskCompletedEvent;
 import org.example.learnlink.modules.planner.event.TaskCreatedEvent;
 import org.springframework.stereotype.Component;
@@ -134,19 +133,6 @@ public class AdminStatsEventListener {
             log.info("Admin stats: Updated connection count successfully");
         } catch (Exception e) {
             log.error("Admin stats: Failed to update connection count", e);
-        }
-    }
-
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void handleStudyGroupCreated(StudyGroupCreatedEvent event) {
-        log.info("Admin stats: Study group created - groupId={}, ownerId={}",
-                event.getGroupId(), event.getOwnerId());
-        try {
-            platformStatsRepository.incrementTotalStudyGroups();
-            log.info("Admin stats: Updated study group count successfully");
-        } catch (Exception e) {
-            log.error("Admin stats: Failed to update study group count", e);
         }
     }
 

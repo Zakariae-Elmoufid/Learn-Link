@@ -10,6 +10,7 @@ import org.example.learnlink.modules.matching.repository.ConnectionRequestReposi
 import org.example.learnlink.modules.user.entity.StudentSubject;
 import org.example.learnlink.modules.user.entity.UserProfile;
 import org.example.learnlink.modules.user.repository.UserProfileRepository;
+import org.example.learnlink.modules.user.service.ProfileService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +36,7 @@ public class MatchingServiceImpl implements IMatchingService {
     private final UserProfileRepository userProfileRepository;
     private final ConnectionRepository connectionRepository;
     private final ConnectionRequestRepository connectionRequestRepository;
+    private final ProfileService profileService;
 
     // Weights for compatibility scoring
     private static final BigDecimal SUBJECT_WEIGHT = new BigDecimal("0.60");
@@ -177,7 +179,7 @@ public class MatchingServiceImpl implements IMatchingService {
                 .userId(candidate.getUserId())
                 .firstName(candidate.getFirstName())
                 .lastName(candidate.getLastName())
-                .profilePictureUrl(candidate.getProfilePictureUrl())
+                .profilePictureUrl(profileService.toPresignedUrl(candidate.getProfilePictureUrl()))
                 .bio(candidate.getBio())
                 .academicLevel(candidate.getAcademicLevel() != null
                         ? candidate.getAcademicLevel().name()
