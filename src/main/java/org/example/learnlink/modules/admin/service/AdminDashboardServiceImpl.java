@@ -85,8 +85,9 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     private List<SubjectStatDto> getTopSubjects(int limit) {
         try {
             List<Object[]> subjectCounts = studentSubjectRepository.findTopSubjectsWithCount(limit);
+            log.info("subjectCounts size: {}", subjectCounts.size());
             long totalStudents = studentSubjectRepository.countTotalStudentSubjectAssociations();
-            
+            log.info("totalStudents: {}", totalStudents);
             return subjectCounts.stream()
                     .map(row -> {
                         String name = (String) row[0];

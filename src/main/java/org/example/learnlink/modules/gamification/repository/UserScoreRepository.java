@@ -26,4 +26,10 @@ public interface UserScoreRepository extends JpaRepository<UserScore, Long> {
      */
     @Query("SELECT COALESCE(SUM(us.totalPoints), 0) FROM UserScore us")
     long sumTotalPoints();
+
+    /**
+     * Count badges earned by user
+     */
+    @Query("SELECT COUNT(ub) FROM UserBadge ub WHERE ub.userId = :userId")
+    long countBadgesEarnedByUserId(@Param("userId") Long userId);
 }

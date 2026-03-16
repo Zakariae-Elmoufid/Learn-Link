@@ -84,7 +84,7 @@ public class CommentServiceImpl implements ICommentService {
     @Override
     @Transactional(readOnly = true)
     public List<CommentResponse> getCommentsForPost(Long postId) {
-        return commentRepository.findByPostIdOrderByCreatedAtDesc(postId)
+        return commentRepository.findByPostIdAndHiddenIsFalseOrderByCreatedAtDesc(postId)
             .stream()
             .map(commentMapper::commentToResponse)
             .collect(Collectors.toList());
@@ -93,7 +93,7 @@ public class CommentServiceImpl implements ICommentService {
     @Override
     @Transactional(readOnly = true)
     public List<CommentResponse> getCommentsForAnswer(Long answerId) {
-        return commentRepository.findByAnswerIdOrderByCreatedAtDesc(answerId)
+        return commentRepository.findByAnswerIdAndHiddenIsFalseOrderByCreatedAtDesc(answerId)
             .stream()
             .map(commentMapper::commentToResponse)
             .collect(Collectors.toList());
@@ -102,7 +102,7 @@ public class CommentServiceImpl implements ICommentService {
     @Override
     @Transactional(readOnly = true)
     public Page<CommentResponse> getUserComments(Long userId, Pageable pageable) {
-        return commentRepository.findByUserId(userId, pageable)
+        return commentRepository.findByUserIdAndHiddenIsFalse(userId, pageable)
             .map(commentMapper::commentToResponse);
     }
 

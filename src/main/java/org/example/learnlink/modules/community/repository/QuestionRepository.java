@@ -19,23 +19,23 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     /**
      * Find all questions by user ID
      */
-    Page<Question> findByUserId(Long userId, Pageable pageable);
+    Page<Question> findByUserIdAndHiddenIsFalse(Long userId, Pageable pageable);
 
     /**
      * Find all unresolved questions
      */
-    Page<Question> findByIsResolvedFalse(Pageable pageable);
+    Page<Question> findByIsResolvedFalseAndHiddenIsFalse(Pageable pageable);
 
     /**
      * Find all resolved questions
      */
-    Page<Question> findByIsResolvedTrue(Pageable pageable);
+    Page<Question> findByIsResolvedTrueAndHiddenIsFalse(Pageable pageable);
 
     /**
      * Search questions by keyword in title or content
      */
-    @Query("SELECT q FROM Question q WHERE LOWER(q.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-           "OR LOWER(q.content) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+    @Query("SELECT q FROM Question q WHERE q.hidden = false AND (LOWER(q.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "OR LOWER(q.content) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
            "ORDER BY q.createdAt DESC")
     Page<Question> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
@@ -47,7 +47,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     /**
      * Find most viewed questions
      */
-    @Query("SELECT q FROM Question q ORDER BY q.viewCount DESC")
+    @Query("SELECT q FROM Question q WHERE q.hidden = false ORDER BY q.viewCount DESC")
     Page<Question> findMostViewedQuestions(Pageable pageable);
 
     // Moderation queries
@@ -61,5 +61,16 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
      * Find all visible (not hidden) questions
      */
     Page<Question> findByHiddenFalse(Pageable pageable);
+
+    /**
+     * Find recent questions by user ordered by creation date
+     */
+    List<Question> findByUserIdAndHiddenIsFalseOrderByCreatedAtDesc(Long userId);
+
+    /**
+     * Count resolved questions by user
+     */
+    @Query("SELECT COUNT(q) FROM Question q WHERE q.userId = :userId AND q.isResolved = true")
+    long countResolvedQuestionsByUserId(@Param("userId") Long userId);
 }
 

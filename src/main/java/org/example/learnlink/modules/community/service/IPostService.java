@@ -28,6 +28,7 @@ public interface IPostService {
      */
     Page<PostResponse> getUserPosts(Long userId, Pageable pageable, Long currentUserId);
 
+
     /**
      * Get posts by category
      */

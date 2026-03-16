@@ -97,4 +97,23 @@ public interface ConnectionRepository extends JpaRepository<Connection, Long> {
             "FROM Connection c WHERE (c.user1Id = :userId OR c.user2Id = :userId) " +
             "AND c.status = 'ACTIVE'")
     List<Long> findConnectedUserIds(@Param("userId") Long userId);
+
+    /**
+     * Count active connections for a user (alias for countActiveByUserId)
+     *
+     * @param userId the user ID
+     * @return count of active connections
+     */
+    @Query("SELECT COUNT(c) FROM Connection c WHERE " +
+            "(c.user1Id = :userId OR c.user2Id = :userId) AND c.status = 'ACTIVE'")
+    long countActiveConnectionsByUserId(@Param("userId") Long userId);
+
+    /**
+     * Find recent connections for a user ordered by creation date
+     *
+     * @param userId the user ID
+     * @return list of connections ordered by creation date
+     */
+    @Query("SELECT c FROM Connection c WHERE c.user1Id = :userId ORDER BY c.connectedAt DESC")
+    List<Connection> findByUser1IdOrderByCreatedAtDesc(@Param("userId") Long userId);
 }

@@ -79,9 +79,9 @@ public class AdminUserServiceImpl implements AdminUserService {
                 pageable
         );
 
-        // Map to DTOs (basic info only for list view)
+        // Map to DTOs with full stats
         List<AdminUserDto> userDtos = userPage.getContent().stream()
-                .map(this::mapToBasicDto)
+                .map(this::mapToFullDto)
                 .collect(Collectors.toList());
 
         return PageResponse.<AdminUserDto>builder()

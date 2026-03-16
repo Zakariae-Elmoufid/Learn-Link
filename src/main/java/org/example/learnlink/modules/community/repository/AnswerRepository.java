@@ -20,18 +20,18 @@ public interface AnswerRepository extends JpaRepository<Answer, Long> {
     /**
      * Find all answers for a question
      */
-    @Query("SELECT a FROM Answer a WHERE a.questionId = :questionId ORDER BY a.voteCount DESC")
+    @Query("SELECT a FROM Answer a WHERE a.questionId = :questionId AND a.hidden = false ORDER BY a.voteCount DESC")
     List<Answer> findByQuestionId(@Param("questionId") Long questionId);
 
     /**
      * Find all answers by user
      */
-    Page<Answer> findByUserId(Long userId, Pageable pageable);
+    Page<Answer> findByUserIdAndHiddenIsFalse(Long userId, Pageable pageable);
 
     /**
      * Find the accepted answer for a question
      */
-    Optional<Answer> findByQuestionIdAndIsAcceptedTrue(Long questionId);
+    Optional<Answer> findByQuestionIdAndIsAcceptedTrueAndHiddenIsFalse(Long questionId);
 
     /**
      * Count answers for a question
@@ -41,7 +41,7 @@ public interface AnswerRepository extends JpaRepository<Answer, Long> {
     /**
      * Find top answers ordered by vote count
      */
-    @Query("SELECT a FROM Answer a ORDER BY a.voteCount DESC")
+    @Query("SELECT a FROM Answer a WHERE a.hidden = false ORDER BY a.voteCount DESC")
     Page<Answer> findTopAnswers(Pageable pageable);
 
     /**
@@ -60,5 +60,21 @@ public interface AnswerRepository extends JpaRepository<Answer, Long> {
      * Find all visible (not hidden) answers
      */
     Page<Answer> findByHiddenFalse(Pageable pageable);
+
+    /**
+     * Count answers by user
+     */
+    long countByUserId(Long userId);
+
+    /**
+     * Count accepted answers by user
+     */
+    @Query("SELECT COUNT(a) FROM Answer a WHERE a.userId = :userId AND a.isAccepted = true")
+    long countAcceptedAnswersByUserId(@Param("userId") Long userId);
+
+    /**
+     * Find recent answers by user ordered by creation date
+     */
+    List<Answer> findByUserIdAndHiddenIsFalseOrderByCreatedAtDesc(Long userId);
 }
 

@@ -55,7 +55,7 @@ public class PostServiceImpl implements IPostService {
     @Override
     @Transactional(readOnly = true)
     public PostResponse getPostById(Long postId, Long currentUserId) {
-        Post post = postRepository.findById(postId)
+        Post post = postRepository.findByIdAndHiddenIsFalse(postId)
             .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
 
         // Increment view count
@@ -69,21 +69,21 @@ public class PostServiceImpl implements IPostService {
     @Override
     @Transactional(readOnly = true)
     public Page<PostResponse> getUserPosts(Long userId, Pageable pageable, Long currentUserId) {
-        return postRepository.findByUserId(userId, pageable)
+        return postRepository.findByUserIdAndHiddenIsFalse(userId, pageable)
             .map(post -> mapToResponseWithLikeStatus(post, currentUserId));
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<PostResponse> getPostsByCategory(PostCategory category, Pageable pageable, Long currentUserId) {
-        return postRepository.findByCategory(category, pageable)
+        return postRepository.findByCategoryAndHiddenIsFalse(category, pageable)
             .map(post -> mapToResponseWithLikeStatus(post, currentUserId));
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<PostResponse> getPopularPosts(Pageable pageable, Long currentUserId) {
-        return postRepository.findPopularPosts(pageable)
+        return postRepository.findPopularPostsAndHiddenIsFalse(pageable)
             .map(post -> mapToResponseWithLikeStatus(post, currentUserId));
     }
 
@@ -91,7 +91,7 @@ public class PostServiceImpl implements IPostService {
     @Transactional(readOnly = true)
     public Page<PostResponse> getTrendingPosts(Pageable pageable, Long currentUserId) {
         LocalDateTime since = LocalDateTime.now().minusHours(24);
-        return postRepository.findTrendingPosts(since, pageable)
+        return postRepository.findTrendingPostsAndHiddenIsFalse(since, pageable)
             .map(post -> mapToResponseWithLikeStatus(post, currentUserId));
     }
 
@@ -174,9 +174,10 @@ public class PostServiceImpl implements IPostService {
     @Override
     @Transactional(readOnly = true)
     public Page<PostResponse> getAllPosts(Pageable pageable, Long currentUserId) {
-        return postRepository.findAll(pageable)
+        return postRepository.findByHiddenFalse(pageable)
             .map(post -> mapToResponseWithLikeStatus(post, currentUserId));
     }
+
 
     private PostResponse mapToResponseWithLikeStatus(Post post, Long currentUserId) {
         PostResponse response = postMapper.postToResponse(post);

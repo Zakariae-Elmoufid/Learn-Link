@@ -48,6 +48,7 @@ public class AdminModeratorController {
     }
 
     @GetMapping("/{userId}/permissions")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('MODERATOR'))")
     @Operation(summary = "Get moderator permissions", description = "Retrieves current and available permissions for a moderator")
     public ResponseEntity<ModeratorPermissionsResponse> getModeratorPermissions(
             @Parameter(description = "User ID of the moderator") @PathVariable Long userId) {
@@ -78,7 +79,7 @@ public class AdminModeratorController {
     @DeleteMapping("/{userId}")
     @Operation(summary = "Remove moderator", description = "Removes moderator role from a user, reverting them to STUDENT role")
     public ResponseEntity<Void> removeModerator(
-            @AuthenticationPrincipal User admin,
+            @AuthenticationPrincipal CustomUserDetails admin,
             @Parameter(description = "User ID of the moderator") @PathVariable Long userId,
             @Parameter(description = "Reason for removing moderator role") @RequestParam(required = false) String reason) {
         adminModeratorService.removeModerator(admin.getId(), userId, reason);

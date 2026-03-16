@@ -77,7 +77,7 @@ public class AnswerServiceImpl implements IAnswerService {
     @Override
     @Transactional(readOnly = true)
     public Page<AnswerResponse> getUserAnswers(Long userId, Pageable pageable) {
-        return answerRepository.findByUserId(userId, pageable)
+        return answerRepository.findByUserIdAndHiddenIsFalse(userId, pageable)
             .map(answerMapper::answerToResponse);
     }
 

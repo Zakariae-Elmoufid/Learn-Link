@@ -19,17 +19,17 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     /**
      * Find all comments for a post
      */
-    List<Comment> findByPostIdOrderByCreatedAtDesc(Long postId);
+    List<Comment> findByPostIdAndHiddenIsFalseOrderByCreatedAtDesc(Long postId);
 
     /**
      * Find all comments for an answer
      */
-    List<Comment> findByAnswerIdOrderByCreatedAtDesc(Long answerId);
+    List<Comment> findByAnswerIdAndHiddenIsFalseOrderByCreatedAtDesc(Long answerId);
 
     /**
      * Find comments by user
      */
-    Page<Comment> findByUserId(Long userId, Pageable pageable);
+    Page<Comment> findByUserIdAndHiddenIsFalse(Long userId, Pageable pageable);
 
     /**
      * Count comments on a post
@@ -44,7 +44,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     /**
      * Find all comments on posts by user
      */
-    @Query("SELECT c FROM Comment c WHERE c.postId IN " +
+    @Query("SELECT c FROM Comment c WHERE c.hidden = false AND c.postId IN " +
            "(SELECT p.id FROM Post p WHERE p.userId = :userId)")
     Page<Comment> findCommentsOnUserPosts(@Param("userId") Long userId, Pageable pageable);
 
@@ -59,5 +59,15 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
      * Find all visible (not hidden) comments
      */
     Page<Comment> findByHiddenFalse(Pageable pageable);
+
+    /**
+     * Count comments by user
+     */
+    long countByUserId(Long userId);
+
+    /**
+     * Find recent comments by user ordered by creation date
+     */
+    List<Comment> findByUserIdOrderByCreatedAtDesc(Long userId);
 }
 

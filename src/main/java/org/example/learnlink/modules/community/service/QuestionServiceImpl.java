@@ -58,21 +58,21 @@ public class QuestionServiceImpl implements IQuestionService {
     @Override
     @Transactional(readOnly = true)
     public Page<QuestionResponse> getUserQuestions(Long userId, Pageable pageable) {
-        return questionRepository.findByUserId(userId, pageable)
+        return questionRepository.findByUserIdAndHiddenIsFalse(userId, pageable)
             .map(this::convertToResponse);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<QuestionResponse> getUnresolvedQuestions(Pageable pageable) {
-        return questionRepository.findByIsResolvedFalse(pageable)
+        return questionRepository.findByIsResolvedFalseAndHiddenIsFalse(pageable)
             .map(this::convertToResponse);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<QuestionResponse> getResolvedQuestions(Pageable pageable) {
-        return questionRepository.findByIsResolvedTrue(pageable)
+        return questionRepository.findByIsResolvedTrueAndHiddenIsFalse(pageable)
             .map(this::convertToResponse);
     }
 
@@ -86,7 +86,7 @@ public class QuestionServiceImpl implements IQuestionService {
     @Override
     @Transactional(readOnly = true)
     public Page<QuestionResponse> getAllQuestions(Pageable pageable) {
-        return questionRepository.findAll(pageable)
+        return questionRepository.findByHiddenFalse(pageable)
             .map(this::convertToResponse);
     }
 

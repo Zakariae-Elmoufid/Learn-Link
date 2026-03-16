@@ -18,8 +18,8 @@ public interface StudentSubjectRepository extends JpaRepository<StudentSubject, 
      */
     @Query(value = "SELECT s.name, COUNT(up.id) as student_count " +
            "FROM student_subject s " +
-           "LEFT JOIN user_profile_subjects ups ON s.id = ups.subjects_id " +
-           "LEFT JOIN user_profile up ON ups.user_profile_id = up.id " +
+           "LEFT JOIN user_profile_subject ups ON s.id = ups.subject_id " +
+           "LEFT JOIN user_profiles up ON ups.profile_id = up.id " +
            "GROUP BY s.id, s.name " +
            "ORDER BY student_count DESC " +
            "LIMIT :limit", nativeQuery = true)
@@ -28,6 +28,6 @@ public interface StudentSubjectRepository extends JpaRepository<StudentSubject, 
     /**
      * Count total student-subject associations
      */
-    @Query(value = "SELECT COUNT(*) FROM user_profile_subjects", nativeQuery = true)
+    @Query(value = "SELECT COUNT(*) FROM user_profile_subject", nativeQuery = true)
     long countTotalStudentSubjectAssociations();
 }

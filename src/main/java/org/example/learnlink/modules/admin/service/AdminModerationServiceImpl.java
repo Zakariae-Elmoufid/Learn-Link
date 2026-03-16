@@ -8,7 +8,11 @@ import org.example.learnlink.modules.admin.dto.response.*;
 import org.example.learnlink.modules.admin.entity.ModerationActionType;
 import org.example.learnlink.modules.admin.entity.ModerationLog;
 import org.example.learnlink.modules.admin.entity.ModerationTargetType;
+import org.example.learnlink.modules.admin.entity.ModeratorPermission;
 import org.example.learnlink.modules.admin.repository.ModerationLogRepository;
+import org.example.learnlink.modules.admin.repository.ModeratorPermissionRepository;
+import org.example.learnlink.modules.auth.entity.User;
+import org.example.learnlink.modules.auth.entity.UserRole;
 import org.example.learnlink.modules.auth.repository.UserRepository;
 import org.example.learnlink.modules.community.entity.Answer;
 import org.example.learnlink.modules.community.entity.Comment;
@@ -39,6 +43,7 @@ public class AdminModerationServiceImpl implements AdminModerationService {
     private final AnswerRepository answerRepository;
     private final ModerationLogRepository moderationLogRepository;
     private final UserRepository userRepository;
+    private final ModeratorPermissionRepository moderatorPermissionRepository;
 
     // ==================== POST MODERATION ====================
 
@@ -60,6 +65,9 @@ public class AdminModerationServiceImpl implements AdminModerationService {
     @Transactional
     public ModerationActionResponse hidePost(Long postId, Long moderatorId, ModerationActionRequest request) {
         log.info("Moderator {} hiding post {}", moderatorId, postId);
+        
+        // Check if moderator has HIDE_POSTS permission
+        checkModeratorPermission(moderatorId, ModeratorPermission.HIDE_POSTS);
         
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found with ID: " + postId));
@@ -171,6 +179,9 @@ public class AdminModerationServiceImpl implements AdminModerationService {
     public ModerationActionResponse hideComment(Long commentId, Long moderatorId, ModerationActionRequest request) {
         log.info("Moderator {} hiding comment {}", moderatorId, commentId);
         
+        // Check if moderator has HIDE_COMMENTS permission
+        checkModeratorPermission(moderatorId, ModeratorPermission.HIDE_COMMENTS);
+        
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment not found with ID: " + commentId));
         
@@ -281,6 +292,9 @@ public class AdminModerationServiceImpl implements AdminModerationService {
     public ModerationActionResponse hideQuestion(Long questionId, Long moderatorId, ModerationActionRequest request) {
         log.info("Moderator {} hiding question {}", moderatorId, questionId);
         
+        // Check if moderator has HIDE_QUESTIONS permission
+        checkModeratorPermission(moderatorId, ModeratorPermission.HIDE_QUESTIONS);
+        
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Question not found with ID: " + questionId));
         
@@ -390,6 +404,9 @@ public class AdminModerationServiceImpl implements AdminModerationService {
     @Transactional
     public ModerationActionResponse hideAnswer(Long answerId, Long moderatorId, ModerationActionRequest request) {
         log.info("Moderator {} hiding answer {}", moderatorId, answerId);
+        
+        // Check if moderator has HIDE_ANSWERS permission
+        checkModeratorPermission(moderatorId, ModeratorPermission.HIDE_ANSWERS);
         
         Answer answer = answerRepository.findById(answerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Answer not found with ID: " + answerId));
@@ -531,6 +548,35 @@ public class AdminModerationServiceImpl implements AdminModerationService {
         return userRepository.findById(userId)
                 .map(user -> user.getUsername())
                 .orElse("Unknown");
+    }
+
+    /**
+     * Validates that a moderator has the required permission
+     * @param moderatorId The ID of the moderator
+     * @param requiredPermission The permission to check
+     * @throws IllegalStateException if moderator doesn't have the permission or if user is not a moderator
+     */
+    private void checkModeratorPermission(Long moderatorId, ModeratorPermission requiredPermission) {
+        User moderator = userRepository.findById(moderatorId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + moderatorId));
+        
+        // Check if user has MODERATOR role
+        if (moderator.getRole() != UserRole.MODERATOR) {
+            throw new IllegalStateException("User does not have MODERATOR role");
+        }
+        
+        // Get moderator permissions
+        var moderatorPermissions = moderatorPermissionRepository.findByUserId(moderatorId)
+                .orElseThrow(() -> new IllegalStateException("Moderator permissions not found for user ID: " + moderatorId));
+        
+        // Check if moderator has the required permission
+        if (!moderatorPermissions.getPermissions().contains(requiredPermission)) {
+            throw new IllegalStateException(
+                String.format("Moderator does not have permission: %s", requiredPermission.name())
+            );
+        }
+        
+        log.debug("Permission check passed for moderator {} with permission {}", moderatorId, requiredPermission.name());
     }
 
     private PostModerationDto mapToPostModerationDto(Post post) {
