@@ -1,6 +1,14 @@
 pipeline {
     agent any
 
+    tools {
+            // This name MUST match the name you gave in Global Tool Configuration
+            maven 'maven3'
+            dockerTool 'docker'
+        }
+
+
+
     environment {
         // Jenkins Credentials ID
         DOCKER_AUTH = credentials('docker-hub-secret')
