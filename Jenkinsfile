@@ -2,9 +2,7 @@ pipeline {
     agent any
 
     tools {
-            // This name MUST match the name you gave in Global Tool Configuration
             maven 'maven3'
-            dockerTool 'docker'
         }
 
 
@@ -28,7 +26,7 @@ pipeline {
             steps {
                 echo "Compiling and running all tests..."
                 // 'verify' handles unit tests, integration tests, and creates the JAR
-                sh 'mvn clean verify -Pintegration-test'
+                sh 'mvn clean verify'
             }
             post {
                 always {
