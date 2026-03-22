@@ -5,7 +5,7 @@ pipeline {
             // This name MUST match the name you gave in Global Tool Configuration
             maven 'maven3'
             dockerTool 'docker'
-        }
+    }
 
 
 
