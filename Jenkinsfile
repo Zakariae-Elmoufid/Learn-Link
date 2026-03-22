@@ -11,8 +11,8 @@ pipeline {
     environment {
         // Jenkins Credentials ID
         DOCKER_AUTH = credentials('docker-hub-secret')
-        // Full image name (DockerHubUser/RepoName)
         IMAGE_NAME = "zakariaemoufid/learn-link"
+        DOCKER_HOST = 'tcp://host.docker.internal:2375'
     }
 
     stages {
