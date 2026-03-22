@@ -3,6 +3,7 @@ pipeline {
 
     tools {
             maven 'maven3'
+            dockerTool 'docker'
         }
 
 
@@ -26,7 +27,7 @@ pipeline {
             steps {
                 echo "Compiling and running all tests..."
                 // 'verify' handles unit tests, integration tests, and creates the JAR
-                sh 'mvn clean verify'
+                sh 'mvn clean verify -Pintegration-test'
             }
             post {
                 always {
