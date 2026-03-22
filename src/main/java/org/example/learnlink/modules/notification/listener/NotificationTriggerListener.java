@@ -27,6 +27,16 @@ public class NotificationTriggerListener {
     private final org.example.learnlink.modules.community.repository.PostRepository postRepository;
     private final org.example.learnlink.modules.community.repository.QuestionRepository questionRepository;
     private final org.example.learnlink.modules.community.repository.AnswerRepository answerRepository;
+    private final org.example.learnlink.modules.auth.repository.UserRepository userRepository;
+
+    /**
+     * Helper to get username from userId
+     */
+    private String getUsername(Long userId) {
+        return userRepository.findById(userId)
+                .map(org.example.learnlink.modules.auth.entity.User::getUsername)
+                .orElse("A user");
+    }
 
     /**
      * Handle badge earned event
@@ -60,8 +70,9 @@ public class NotificationTriggerListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handlePostLiked(org.example.learnlink.modules.community.event.PostLikedEvent event) {
         if (event.getLikerUserId().equals(event.getPostAuthorId())) return;
+        String username = getUsername(event.getLikerUserId());
         publish(event.getPostAuthorId(), NotificationType.POST_LIKED,
-                "Someone liked your post!",
+                username + " liked your post!",
                 "A user liked your post.",
                 Map.of("postId", event.getPostId(), "likerId", event.getLikerUserId(), "link", "/community/posts/" + event.getPostId()));
     }
@@ -73,16 +84,17 @@ public class NotificationTriggerListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleCommentAdded(org.example.learnlink.modules.community.event.CommentAddedEvent event) {
         Long recipientId = null;
-        String title = "New comment!";
+        String username = getUsername(event.getUserId());
+        String title = username + " commented!";
         String link = "/";
 
         if (event.getPostId() != null) {
             recipientId = postRepository.findById(event.getPostId()).map(p -> p.getUserId()).orElse(null);
-            title = "Someone commented on your post!";
+            title = username + " commented on your post!";
             link = "/community/posts/" + event.getPostId();
         } else if (event.getAnswerId() != null) {
             recipientId = answerRepository.findById(event.getAnswerId()).map(a -> a.getUserId()).orElse(null);
-            title = "Someone commented on your answer!";
+            title = username + " commented on your answer!";
             link = "/community/answers/" + event.getAnswerId();
         }
 
@@ -100,8 +112,9 @@ public class NotificationTriggerListener {
     public void handleAnswerProvided(org.example.learnlink.modules.community.event.AnswerProvidedEvent event) {
         Long askerId = questionRepository.findById(event.getQuestionId()).map(q -> q.getUserId()).orElse(null);
         if (askerId != null && !askerId.equals(event.getUserId())) {
+            String username = getUsername(event.getUserId());
             publish(askerId, NotificationType.QUESTION_ANSWERED,
-                    "New answer to your question!",
+                    username + " answered your question!",
                     "Someone provided an answer to your question.",
                     Map.of("questionId", event.getQuestionId(), "answerId", event.getAnswerId(), "link", "/community/questions/" + event.getQuestionId()));
         }
@@ -114,8 +127,9 @@ public class NotificationTriggerListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAnswerAccepted(org.example.learnlink.modules.community.event.AnswerAcceptedEvent event) {
         if (!event.getAnswerAuthorId().equals(event.getQuestionAskerUserId())) {
+            String username = getUsername(event.getQuestionAskerUserId());
             publish(event.getAnswerAuthorId(), NotificationType.ANSWER_ACCEPTED,
-                    "Your answer was accepted!",
+                    username + " accepted your answer!",
                     "Congratulations! Your answer was marked as the best answer.",
                     Map.of("answerId", event.getAnswerId(), "link", "/community/answers/" + event.getAnswerId()));
         }
@@ -127,8 +141,9 @@ public class NotificationTriggerListener {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleConnectionRequest(org.example.learnlink.modules.matching.event.ConnectionRequestSentEvent event) {
+        String username = getUsername(event.getSenderId());
         publish(event.getReceiverId(), NotificationType.CONNECTION_REQUEST,
-                "New Connection Request",
+                "New Connection Request from " + username,
                 "Someone wants to connect with you.",
                 Map.of("requestId", event.getRequestId(), "senderId", event.getSenderId(), "link", "/connections/requests"));
     }
@@ -139,9 +154,12 @@ public class NotificationTriggerListener {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleConnectionAccepted(org.example.learnlink.modules.matching.event.ConnectionAcceptedEvent event) {
-        // Notify the person who sent the request (user1)
+        // user1 is the one who sent the request (sender)
+        // user2 is the one who accepted the request (receiver)
+        // So we notify user1 that user2 accepted their request
+        String username = getUsername(event.getUser2Id()); // The person who accepted
         publish(event.getUser1Id(), NotificationType.CONNECTION_ACCEPTED,
-                "Connection Request Accepted",
+                username + " accepted your connection request",
                 "Your connection request was accepted!",
                 Map.of("connectionId", event.getConnectionId(), "user2Id", event.getUser2Id(), "link", "/connections"));
     }
@@ -153,8 +171,9 @@ public class NotificationTriggerListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAnswerUpvoted(org.example.learnlink.modules.community.event.AnswerUpvotedEvent event) {
         if (event.getVoterUserId().equals(event.getAnswerAuthorId())) return;
+        String username = getUsername(event.getVoterUserId());
         publish(event.getAnswerAuthorId(), NotificationType.ANSWER_VOTED,
-                "Someone upvoted your answer!",
+                username + " upvoted your answer!",
                 "A user liked your answer on a question.",
                 Map.of("answerId", event.getAnswerId(), "voterId", event.getVoterUserId(), "link", "/community/answers/" + event.getAnswerId()));
     }

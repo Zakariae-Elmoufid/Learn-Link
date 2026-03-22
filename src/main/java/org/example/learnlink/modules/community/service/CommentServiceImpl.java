@@ -46,6 +46,7 @@ public class CommentServiceImpl implements ICommentService {
         post.incrementCommentsCount();
         postRepository.save(post);
 
+        // Publish event for gamification
         eventPublisher.publishEvent(new CommentAddedEvent(this, userId, comment.getId(), postId, null));
 
         return commentMapper.commentToResponse(comment);

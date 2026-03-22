@@ -1,5 +1,6 @@
 package org.example.learnlink.modules.community.service;
 
+import org.example.learnlink.common.service.RedisService;
 import org.example.learnlink.modules.community.dto.CreatePostRequest;
 import org.example.learnlink.modules.community.dto.PostResponse;
 import org.example.learnlink.modules.community.dto.SearchPostRequest;
@@ -8,7 +9,6 @@ import org.example.learnlink.modules.community.entity.Post;
 import org.example.learnlink.modules.community.entity.PostCategory;
 import org.example.learnlink.modules.community.entity.PostLike;
 import org.example.learnlink.modules.community.event.PostCreatedEvent;
-import org.example.learnlink.modules.community.event.PostLikedEvent;
 import org.example.learnlink.modules.community.mapper.PostMapper;
 import org.example.learnlink.modules.community.repository.PostLikeRepository;
 import org.example.learnlink.modules.community.repository.PostRepository;
@@ -158,9 +158,6 @@ public class PostServiceImpl implements IPostService {
         postLikeRepository.save(like);
         post.incrementLikesCount();
         postRepository.save(post);
-
-        // Publish event for notifications
-        eventPublisher.publishEvent(new PostLikedEvent(this, postId, post.getUserId(), userId));
     }
 
     @Override

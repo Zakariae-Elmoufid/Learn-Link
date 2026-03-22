@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/admin/moderation")
 @RequiredArgsConstructor
 @Tag(name = "Admin Content Moderation", description = "Endpoints for moderating posts, comments, questions, and answers")
+
 public class AdminModerationController {
 
     private final AdminModerationService adminModerationService;
