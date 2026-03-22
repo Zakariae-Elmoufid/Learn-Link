@@ -4,7 +4,7 @@ pipeline {
     tools {
             // This name MUST match the name you gave in Global Tool Configuration
             maven 'maven3'
-            docker 'docker'
+            dockerTool 'docker'
         }
 
 
