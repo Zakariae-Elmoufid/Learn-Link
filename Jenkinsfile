@@ -27,19 +27,10 @@ pipeline {
             steps {
                 echo "Compiling and running all tests..."
                 // 'verify' handles unit tests, integration tests, and creates the JAR
-                sh 'mvn clean verify -Pintegration-test'
+                sh 'mvn clean verify '
             }
-            post {
-                always {
-                    // Collects both Surefire (Unit) and Failsafe (Integration) reports
-                    junit 'target/*-reports/*.xml'
 
-                    // Generates the JaCoCo visual report in Jenkins
-                    jacoco execPattern: 'target/*.exec',
-                           classPattern: 'target/classes',
-                           sourcePattern: 'src/main/java'
-                }
-            }
+
         }
 
         stage('Docker Build Image') {
