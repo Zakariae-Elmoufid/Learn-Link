@@ -1,5 +1,6 @@
 package org.example.learnlink.modules.planner.repository;
 
+import org.example.learnlink.modules.matching.entity.Connection;
 import org.example.learnlink.modules.planner.entity.Task;
 import org.example.learnlink.modules.planner.entity.TaskStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -82,4 +83,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
      * Count all completed tasks
      */
     long countByCompletedTrue();
+
+
+    @Query("SELECT t FROM Task t WHERE t.userId = :userId ORDER BY t.completedAt DESC")
+    List<Task> findByUserIdOrderByCreatedAtDesc(@Param("userId") Long userId);
 }

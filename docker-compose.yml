@@ -20,11 +20,17 @@ services:
     ports:
       - "9090:80"
 
+
   redis:
     image: redis:7
     container_name: learnlink-redis
     ports:
       - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   app:
     build:
@@ -36,11 +42,13 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/learnlink
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
-      SPRING_REDIS_HOST: redis
-      SPRING_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
     depends_on:
-      - db
-      - redis
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_started
 
 
 volumes:

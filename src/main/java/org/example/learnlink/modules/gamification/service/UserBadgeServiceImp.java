@@ -46,17 +46,27 @@ public class UserBadgeServiceImp implements UserBadgeService {
             return;
         }
 
-        UserBadge userBadge = UserBadge.builder()
-                .userId(userId)
-                .badgeId(badgeId)
-                .build();
+        try {
+            UserBadge userBadge = UserBadge.builder()
+                    .userId(userId)
+                    .badgeId(badgeId)
+                    .build();
 
-        userBadgeRepository.save(userBadge);
-        
-        // Publish event for admin stats tracking
-        eventPublisher.publishEvent(new BadgeEarnedEvent(this, userId, badgeId, badge.getCode()));
-        
-        log.info("Badge {} awarded successfully to user {}", badgeId, userId);
+            userBadgeRepository.save(userBadge);
+            
+            // Publish event for admin stats tracking
+            eventPublisher.publishEvent(new BadgeEarnedEvent(this, userId, badgeId, badge.getCode()));
+            
+            log.info("Badge {} awarded successfully to user {}", badgeId, userId);
+        } catch (Exception e) {
+            // Handle duplicate key or constraint violation gracefully
+            if (e.getMessage() != null && e.getMessage().contains("duplicate key")) {
+                log.info("Badge {} already awarded to user {} (concurrent award attempt)", badgeId, userId);
+            } else {
+                log.error("Error awarding badge {} to user {}: {}", badgeId, userId, e.getMessage());
+                throw e;
+            }
+        }
     }
 
     @Override

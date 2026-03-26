@@ -19,6 +19,8 @@ public class QuestionResponse {
 
     private Long id;
     private Long userId;
+    private String username;
+    private String profilePictureUrl;
     private String title;
     private String content;
     private Long viewCount;

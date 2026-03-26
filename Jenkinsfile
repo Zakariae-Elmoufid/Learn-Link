@@ -38,7 +38,7 @@ pipeline {
                     echo "Building the Docker image..."
                     // We build the image locally on the Jenkins agent first
                     // We tag it with 'latest' AND the unique 'BUILD_ID'
-                    sh "docker build  --no-cache -t ${IMAGE_NAME}:latest -t ${IMAGE_NAME}:${env.BUILD_ID} ."
+                    sh "docker build -t ${IMAGE_NAME}:latest -t ${IMAGE_NAME}:${env.BUILD_ID} ."
                 }
             }
         }

@@ -19,6 +19,8 @@ public class AnswerResponse {
     private Long id;
     private Long questionId;
     private Long userId;
+    private String username;
+    private String profilePictureUrl;
     private String content;
     private Long voteCount;
     private Long upvoteCount;
