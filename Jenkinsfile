@@ -22,15 +22,6 @@ pipeline {
             }
         }
 
-
-        stage('Prepare .env') {
-                    steps {
-                        withCredentials([file(credentialsId: 'env-file', variable: 'ENV_FILE')]) {
-                            sh 'cp $ENV_FILE .env'
-                        }
-                    }
-                }
-
         stage('Build & Tests') {
             steps {
                 echo "Compiling and running all tests..."

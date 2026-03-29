@@ -70,7 +70,7 @@ public class PlannerGamificationListener {
                     event.getUserId(), points);
 
             // Award PRODUCTIVE_LEARNER badge (ID 3) for completing tasks
-            userBadgeService.awardBadgeToUser(event.getUserId(), 3L);
+            userBadgeService.awardBadgeToUser(event.getUserId(), 9L);
         } catch (Exception e) {
             log.error("Error awarding points for task completion: {}", e.getMessage());
         }

@@ -145,7 +145,7 @@ public class StudentDashboardServiceImpl implements IStudentDashboardService {
                 item.setDescription(commentContent.length() > 100 ? 
                         commentContent.substring(0, Math.min(100, commentContent.length())) + "..." : commentContent);
                 item.setCreatedAt(comment.getCreatedAt());
-                item.setPointsEarned(2);
+                item.setPointsEarned(1);
                 item.setBadgeColor("bronze");
                 activities.add(item);
             }

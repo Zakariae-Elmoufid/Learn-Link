@@ -62,6 +62,7 @@ public class PostServiceImpl implements IPostService {
         post.incrementViewCount();
 
         postRepository.save(post);
+        System.out.println("Post view count incremented for postId: " + postId + ", createdAT : " + post.getCreatedAt());
         return mapToResponseWithLikeStatus(post, currentUserId);
     }
 

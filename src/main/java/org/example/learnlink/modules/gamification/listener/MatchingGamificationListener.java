@@ -46,8 +46,8 @@ public class MatchingGamificationListener {
                     event.getUser1Id(), event.getUser2Id());
 
             // Award SOCIAL_BUTTERFLY badge (ID 4) for making connections
-            userBadgeService.awardBadgeToUser(event.getUser1Id(), 4L);
-            userBadgeService.awardBadgeToUser(event.getUser2Id(), 4L);
+            userBadgeService.awardBadgeToUser(event.getUser1Id(), 7L);
+            userBadgeService.awardBadgeToUser(event.getUser2Id(), 7L);
         } catch (Exception e) {
             log.error("Error awarding points for connection accepted: {}", e.getMessage());
         }
