@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AnswerVote {
+public class    AnswerVote {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

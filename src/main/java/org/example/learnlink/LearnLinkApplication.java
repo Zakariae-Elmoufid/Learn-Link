@@ -23,6 +23,10 @@ public class LearnLinkApplication {
         System.setProperty("AWS_S3_BUCKET_NAME",dotenv.get("AWS_S3_BUCKET_NAME"));
 
 
+        System.setProperty("MAIL_USERNAME",dotenv.get("MAIL_USERNAME"));
+        System.setProperty("MAIL_PASSWORD",dotenv.get("MAIL_PASSWORD"));
+
+
 
 
         SpringApplication.run(LearnLinkApplication.class, args);
